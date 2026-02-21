@@ -9,6 +9,7 @@ import contentRoutes from './routes/content.js';
 import inquiriesRoutes from './routes/inquiries.js';
 import seoRoutes from './routes/seo.js';
 import uploadRoutes from './routes/upload.js';
+import initDatabase from './initDb.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -66,6 +67,9 @@ if (fs.existsSync(distPath)) {
     });
 }
 
-app.listen(PORT, () => {
-    console.log(`🎬 MG Films API Server running on port ${PORT}`);
+// Initialize database tables on startup
+initDatabase().then(() => {
+    app.listen(PORT, () => {
+        console.log(`🎬 MG Films API Server running on port ${PORT}`);
+    });
 });
