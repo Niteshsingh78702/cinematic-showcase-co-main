@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import fs from 'fs';
 import dotenv from 'dotenv';
 import authRoutes from './routes/auth.js';
 import contentRoutes from './routes/content.js';
@@ -41,9 +42,9 @@ app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// Serve static frontend in production
-if (process.env.NODE_ENV === 'production') {
-    const distPath = path.join(__dirname, '..', 'dist');
+// Serve static frontend (always — dist is committed to repo)
+const distPath = path.join(__dirname, '..', 'dist');
+if (fs.existsSync(distPath)) {
     app.use(express.static(distPath));
     app.get('*', (req, res) => {
         res.sendFile(path.join(distPath, 'index.html'));
