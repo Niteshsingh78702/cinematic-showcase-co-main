@@ -9,9 +9,9 @@ dotenv.config({ path: path.join(__dirname, '..', '..', '.env') });
 const poolConfig = {
     host: process.env.DB_HOST || 'localhost',
     port: parseInt(process.env.DB_PORT || '3306'),
-    user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD || '',
-    database: process.env.DB_NAME || 'mg_films',
+    user: process.env.DB_USER || 'u802251718_mgfilms',
+    password: process.env.DB_PASSWORD || 'Nitesh@123#12',
+    database: process.env.DB_NAME || 'u802251718_mgfilms',
     waitForConnections: true,
     connectionLimit: 5,
     queueLimit: 0,
