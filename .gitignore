@@ -1,0 +1,22 @@
+# Server
+server/node_modules/
+server/uploads/
+
+# Frontend
+node_modules
+dist
+dist-ssr
+*.local
+.env
+server/.env
+
+# Editor
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
