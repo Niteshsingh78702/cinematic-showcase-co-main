@@ -20,12 +20,12 @@ const fadeInUp = {
 
 /* ---------- default (fallback) data ---------- */
 const defaultAlbums = [
-    { title: "Mon Bhore Jai", category: "Purulia Bangla", image: albumCover, year: "2024" },
-    { title: "Khortha Melodies", category: "Khortha", image: filmCover, year: "2023" },
-    { title: "Santhali Serenade", category: "Santhali", image: weddingCover, year: "2023" },
-    { title: "Dil Ka Dard", category: "Purulia Bangla", image: heroBg, year: "2024" },
-    { title: "Prem Kahani", category: "Khortha", image: actressPortrait, year: "2023" },
-    { title: "Jharkhand Ki Rani", category: "Santhali", image: albumCover, year: "2022" },
+    { title: "Mon Bhore Jai", category: "Purulia Bangla", image: albumCover, year: "2024", link: "", mediaType: "image" },
+    { title: "Khortha Melodies", category: "Khortha", image: filmCover, year: "2023", link: "", mediaType: "image" },
+    { title: "Santhali Serenade", category: "Santhali", image: weddingCover, year: "2023", link: "", mediaType: "image" },
+    { title: "Dil Ka Dard", category: "Purulia Bangla", image: heroBg, year: "2024", link: "", mediaType: "image" },
+    { title: "Prem Kahani", category: "Khortha", image: actressPortrait, year: "2023", link: "", mediaType: "image" },
+    { title: "Jharkhand Ki Rani", category: "Santhali", image: albumCover, year: "2022", link: "", mediaType: "image" },
 ];
 
 const defaultFilms = [
@@ -43,22 +43,46 @@ const defaultWeddingPhotos = [
 ];
 
 /* ---------- helpers — map API data to display ---------- */
+const getYouTubeThumbnail = (url: string) => {
+    // Extract video ID from various YouTube URL formats
+    let videoId = url;
+    const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|shorts\/))([\w-]{11})/);
+    if (match) videoId = match[1];
+    // If it's already just an ID (11 chars)
+    if (/^[\w-]{11}$/.test(videoId)) return `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+    return null;
+};
+
 const mapAlbums = (items: ContentItem[]) =>
     items.map((i) => ({
         title: i.title || "Untitled Album",
         category: i.category || "Purulia Bangla",
-        image: i.media_url || albumCover,
-        year: i.link_url || "2024",
+        image: i.media_type === 'youtube' && i.media_url
+            ? getYouTubeThumbnail(i.media_url) || albumCover
+            : i.media_url || albumCover,
+        year: i.description || "2024",
+        link: i.link_url || (i.media_type === 'youtube' && i.media_url
+            ? (i.media_url.includes('youtube.com') || i.media_url.includes('youtu.be')
+                ? i.media_url
+                : `https://www.youtube.com/watch?v=${i.media_url}`)
+            : ""),
+        mediaType: i.media_type || 'image',
     }));
 
 const mapFilms = (items: ContentItem[]) =>
-    items.map((i) => ({
-        title: i.title || "Untitled Film",
-        videoId: i.media_url || "dQw4w9WgXcQ",
-        year: i.link_url || "2024",
-        genre: i.category || "Drama • Short Film",
-        description: i.description || "",
-    }));
+    items.map((i) => {
+        // Extract video ID from full YouTube URLs
+        let videoId = i.media_url || "dQw4w9WgXcQ";
+        const match = videoId.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|shorts\/))([\w-]{11})/);
+        if (match) videoId = match[1];
+        return {
+            title: i.title || "Untitled Film",
+            videoId,
+            year: i.link_url || "2024",
+            genre: i.category || "Drama • Short Film",
+            description: i.description || "",
+        };
+    });
 
 const mapWeddings = (items: ContentItem[]) =>
     items.map((i) => ({
@@ -165,8 +189,18 @@ const Work = () => {
                                     exit={{ opacity: 0, scale: 0.9 }}
                                     transition={{ duration: 0.35 }}
                                     className="gallery-card aspect-[3/4]"
+                                    style={{ cursor: album.link ? 'pointer' : 'default' }}
+                                    onClick={() => album.link && window.open(album.link, '_blank')}
                                 >
                                     <img src={album.image} alt={album.title} loading="lazy" />
+                                    {album.mediaType === 'youtube' && (
+                                        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 5, pointerEvents: 'none' }}>
+                                            <svg width="56" height="56" viewBox="0 0 24 24" fill="none">
+                                                <circle cx="12" cy="12" r="12" fill="rgba(0,0,0,0.6)" />
+                                                <polygon points="10,8 17,12 10,16" fill="white" />
+                                            </svg>
+                                        </div>
+                                    )}
                                     <div className="card-overlay">
                                         <h3>{album.title}</h3>
                                         <p>{album.category} • {album.year}</p>
