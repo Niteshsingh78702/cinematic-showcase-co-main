@@ -42,6 +42,21 @@ app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+// Debug endpoint to check env vars (remove in production later)
+app.get('/api/debug', (req, res) => {
+    res.json({
+        DB_HOST: process.env.DB_HOST ? '✅ set' : '❌ missing',
+        DB_PORT: process.env.DB_PORT ? '✅ set' : '❌ missing',
+        DB_USER: process.env.DB_USER ? '✅ set' : '❌ missing',
+        DB_PASSWORD: process.env.DB_PASSWORD ? '✅ set' : '❌ missing',
+        DB_NAME: process.env.DB_NAME ? '✅ set' : '❌ missing',
+        DB_SSL: process.env.DB_SSL || 'not set',
+        JWT_SECRET: process.env.JWT_SECRET ? '✅ set' : '❌ missing',
+        NODE_ENV: process.env.NODE_ENV || 'not set',
+        PORT: process.env.PORT || 'not set',
+    });
+});
+
 // Serve static frontend (always — dist is committed to repo)
 const distPath = path.join(__dirname, '..', 'dist');
 if (fs.existsSync(distPath)) {
