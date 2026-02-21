@@ -4,9 +4,6 @@ server/uploads/
 
 # Frontend
 node_modules
-dist
-dist-ssr
-*.local
 .env
 server/.env
 
