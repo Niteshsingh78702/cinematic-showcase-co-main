@@ -255,7 +255,7 @@ const Actress = () => {
                                 viewport={{ once: true }}
                                 transition={{ duration: 0.4, delay: i * 0.07 }}
                                 className="gallery-card overflow-hidden"
-                                style={{ height: i % 3 === 0 ? '350px' : '280px' }}
+                                style={{ height: '380px' }}
                                 onClick={() => { setLightboxIndex(i); setLightboxOpen(true); }}
                             >
                                 <img
