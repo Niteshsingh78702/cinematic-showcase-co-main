@@ -6,6 +6,7 @@ import YouTubeEmbed from "@/components/YouTubeEmbed";
 import ImageLightbox from "@/components/ImageLightbox";
 import { useContent, ContentItem } from "@/hooks/useContent";
 import actressPortrait from "@/assets/actress-portrait.jpg";
+import monikaPic from "@/assets/monika.png";
 import heroBg from "@/assets/hero-bg.jpg";
 import albumCover from "@/assets/album-cover.jpg";
 import filmCover from "@/assets/film-cover.jpg";
@@ -17,12 +18,12 @@ const fadeInUp = {
 };
 
 const defaultPhotos = [
-    { src: actressPortrait, alt: "Monika Singh — Portrait" },
+    { src: monikaPic, alt: "Monika Singh — Portrait" },
     { src: heroBg, alt: "Monika Singh — On Set" },
     { src: albumCover, alt: "Monika Singh — Album Shoot" },
     { src: filmCover, alt: "Monika Singh — Film Still" },
     { src: weddingCover, alt: "Monika Singh — Event Appearance" },
-    { src: actressPortrait, alt: "Monika Singh — Traditional" },
+    { src: monikaPic, alt: "Monika Singh — Traditional" },
     { src: heroBg, alt: "Monika Singh — Cinematic" },
     { src: albumCover, alt: "Monika Singh — Behind the Scenes" },
 ];
@@ -59,7 +60,7 @@ const Actress = () => {
             {/* Cinematic Hero */}
             <section className="relative h-[70vh] min-h-[500px] flex items-end overflow-hidden">
                 <div className="absolute inset-0">
-                    <img src={actressPortrait} alt="Monika Singh" className="w-full h-full object-cover object-top" />
+                    <img src={monikaPic} alt="Monika Singh" className="w-full h-full object-cover object-top" />
                     <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
                     <div className="absolute inset-0 bg-gradient-to-r from-background/80 via-transparent to-transparent" />
                 </div>
@@ -94,7 +95,7 @@ const Actress = () => {
                         >
                             <div className="gallery-card aspect-[3/4]">
                                 <img
-                                    src={actressPortrait}
+                                    src={monikaPic}
                                     alt="Monika Singh — Professional Portrait"
                                     className="w-full h-full object-cover"
                                 />
