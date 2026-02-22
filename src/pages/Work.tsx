@@ -56,9 +56,15 @@ const getYouTubeThumbnail = (url: string) => {
 const isYouTubeUrl = (url: string | null) =>
     !!url && (url.includes('youtube.com') || url.includes('youtu.be'));
 
+const getVideoId = (url: string): string | null => {
+    const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|shorts\/))([\w-]{11})/);
+    return match ? match[1] : (/^[\w-]{11}$/.test(url) ? url : null);
+};
+
 const mapAlbums = (items: ContentItem[]) =>
     items.map((i) => {
         const ytDetected = i.media_type === 'youtube' || isYouTubeUrl(i.media_url);
+        const videoId = ytDetected && i.media_url ? getVideoId(i.media_url) : null;
         return {
             title: i.title || "Untitled Album",
             category: i.category || "Purulia Bangla",
@@ -72,6 +78,7 @@ const mapAlbums = (items: ContentItem[]) =>
                     : `https://www.youtube.com/watch?v=${i.media_url}`)
                 : ""),
             mediaType: ytDetected ? 'youtube' : (i.media_type || 'image'),
+            videoId,
         };
     });
 
@@ -108,6 +115,7 @@ const Work = () => {
     const [activeCat, setActiveCat] = useState("All");
     const [lightboxOpen, setLightboxOpen] = useState(false);
     const [lightboxIndex, setLightboxIndex] = useState(0);
+    const [ytModal, setYtModal] = useState<{ videoId: string; title: string; link: string } | null>(null);
 
     /* Fetch all three sections */
     const { data, loading } = useMultiContent(["work_albums", "work_films", "work_weddings"]);
@@ -185,7 +193,7 @@ const Work = () => {
                         </div>
 
                         {/* Albums Grid */}
-                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-w-6xl mx-auto stagger-children">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-w-6xl mx-auto stagger-children">
                             {filteredAlbums.map((album, i) => (
                                 <motion.div
                                     key={album.title + album.category}
@@ -194,9 +202,15 @@ const Work = () => {
                                     animate={{ opacity: 1, scale: 1 }}
                                     exit={{ opacity: 0, scale: 0.9 }}
                                     transition={{ duration: 0.35 }}
-                                    className="gallery-card aspect-[3/4]"
-                                    style={{ cursor: album.link ? 'pointer' : 'default' }}
-                                    onClick={() => album.link && window.open(album.link, '_blank')}
+                                    className="gallery-card aspect-video"
+                                    style={{ cursor: album.mediaType === 'youtube' || album.link ? 'pointer' : 'default' }}
+                                    onClick={() => {
+                                        if (album.mediaType === 'youtube' && album.videoId) {
+                                            setYtModal({ videoId: album.videoId, title: album.title, link: album.link });
+                                        } else if (album.link) {
+                                            window.open(album.link, '_blank');
+                                        }
+                                    }}
                                 >
                                     <img src={album.image} alt={album.title} loading="lazy" />
                                     {album.mediaType === 'youtube' && (
@@ -302,6 +316,55 @@ const Work = () => {
                         />
                     </div>
                 </section>
+            )}
+
+            {/* ========== YouTube Player Modal ========== */}
+            {ytModal && (
+                <div
+                    className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm"
+                    onClick={() => setYtModal(null)}
+                >
+                    <div
+                        className="relative w-full max-w-4xl mx-4"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {/* Close button */}
+                        <button
+                            onClick={() => setYtModal(null)}
+                            className="absolute -top-10 right-0 text-white/70 hover:text-white text-sm font-body flex items-center gap-1 transition-colors"
+                        >
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+                            Close
+                        </button>
+
+                        {/* Embedded YouTube player */}
+                        <div className="aspect-video bg-black rounded-lg overflow-hidden shadow-2xl">
+                            <iframe
+                                src={`https://www.youtube.com/embed/${ytModal.videoId}?autoplay=1&rel=0&modestbranding=1`}
+                                title={ytModal.title}
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowFullScreen
+                                className="w-full h-full border-0"
+                            />
+                        </div>
+
+                        {/* Title + YouTube link */}
+                        <div className="flex items-center justify-between mt-3">
+                            <h3 className="text-white font-display font-semibold text-lg">{ytModal.title}</h3>
+                            {ytModal.link && (
+                                <a
+                                    href={ytModal.link}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-primary text-sm font-body hover:underline flex items-center gap-1"
+                                >
+                                    Watch on YouTube
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg>
+                                </a>
+                            )}
+                        </div>
+                    </div>
+                </div>
             )}
 
             <Footer />
