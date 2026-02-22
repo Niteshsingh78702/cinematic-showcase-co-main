@@ -3,10 +3,15 @@ import multer from 'multer';
 import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { authenticateToken } from '../middleware/auth.js';
 import path from 'path';
+import fs from 'fs';
 import crypto from 'crypto';
 import dotenv from 'dotenv';
+import { fileURLToPath } from 'url';
 
 dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const router = Router();
 
@@ -26,13 +31,19 @@ if (R2_CONFIGURED) {
     });
     console.log('☁️  Cloudflare R2 connected');
 } else {
-    console.log('⚠️  R2 not configured — uploads will use local storage');
+    console.log('📁 R2 not configured — uploads will use local storage (server/uploads/)');
 }
 
 const BUCKET = process.env.R2_BUCKET_NAME || 'mg-films';
 const PUBLIC_URL = process.env.R2_PUBLIC_URL || '';
 
-// Multer — store in memory, upload to R2
+// Ensure local uploads directory exists
+const UPLOADS_DIR = path.join(__dirname, '..', 'uploads');
+if (!fs.existsSync(UPLOADS_DIR)) {
+    fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+}
+
+// Multer — store in memory, upload to R2 or local disk
 const upload = multer({
     storage: multer.memoryStorage(),
     limits: { fileSize: 15 * 1024 * 1024 }, // 15 MB max
@@ -48,38 +59,70 @@ const upload = multer({
     },
 });
 
-// POST /api/upload — upload a file to R2
+/**
+ * Save a file to local disk under server/uploads/<folder>/
+ * Returns { url, key } where url is the public-facing path.
+ */
+function saveToLocalDisk(fileBuffer, originalName, mimetype, folder) {
+    const ext = path.extname(originalName).toLowerCase();
+    const uniqueName = `${crypto.randomUUID()}${ext}`;
+    const folderPath = path.join(UPLOADS_DIR, folder);
+
+    if (!fs.existsSync(folderPath)) {
+        fs.mkdirSync(folderPath, { recursive: true });
+    }
+
+    const filePath = path.join(folderPath, uniqueName);
+    fs.writeFileSync(filePath, fileBuffer);
+
+    const key = `${folder}/${uniqueName}`;
+    const url = `/uploads/${key}`;
+
+    return { url, key };
+}
+
+// POST /api/upload — upload a file (R2 or local fallback)
 router.post('/', authenticateToken, upload.single('file'), async (req, res) => {
     try {
-        if (!R2) {
-            return res.status(503).json({ error: 'File uploads not available — Cloudflare R2 not configured. Add R2 credentials to .env' });
-        }
         if (!req.file) {
             return res.status(400).json({ error: 'No file provided.' });
         }
 
-        const folder = req.body.folder || 'general';  // e.g., 'albums', 'films', 'weddings', 'actress'
-        const ext = path.extname(req.file.originalname).toLowerCase();
-        const uniqueName = `${folder}/${crypto.randomUUID()}${ext}`;
+        const folder = req.body.folder || 'general';
 
-        await R2.send(new PutObjectCommand({
-            Bucket: BUCKET,
-            Key: uniqueName,
-            Body: req.file.buffer,
-            ContentType: req.file.mimetype,
-        }));
+        // ---- R2 upload ----
+        if (R2) {
+            const ext = path.extname(req.file.originalname).toLowerCase();
+            const uniqueName = `${folder}/${crypto.randomUUID()}${ext}`;
 
-        const fileUrl = `${PUBLIC_URL}/${uniqueName}`;
+            await R2.send(new PutObjectCommand({
+                Bucket: BUCKET,
+                Key: uniqueName,
+                Body: req.file.buffer,
+                ContentType: req.file.mimetype,
+            }));
+
+            const fileUrl = `${PUBLIC_URL}/${uniqueName}`;
+            return res.status(201).json({
+                url: fileUrl,
+                key: uniqueName,
+                size: req.file.size,
+                type: req.file.mimetype,
+            });
+        }
+
+        // ---- Local fallback ----
+        const { url, key } = saveToLocalDisk(req.file.buffer, req.file.originalname, req.file.mimetype, folder);
 
         res.status(201).json({
-            url: fileUrl,
-            key: uniqueName,
+            url,
+            key,
             size: req.file.size,
             type: req.file.mimetype,
         });
     } catch (err) {
         console.error('Upload error:', err);
-        res.status(500).json({ error: 'Upload failed. Check R2 configuration.' });
+        res.status(500).json({ error: 'Upload failed.' });
     }
 });
 
@@ -94,23 +137,36 @@ router.post('/multiple', authenticateToken, upload.array('files', 20), async (re
         const results = [];
 
         for (const file of req.files) {
-            const ext = path.extname(file.originalname).toLowerCase();
-            const uniqueName = `${folder}/${crypto.randomUUID()}${ext}`;
+            if (R2) {
+                // ---- R2 upload ----
+                const ext = path.extname(file.originalname).toLowerCase();
+                const uniqueName = `${folder}/${crypto.randomUUID()}${ext}`;
 
-            await R2.send(new PutObjectCommand({
-                Bucket: BUCKET,
-                Key: uniqueName,
-                Body: file.buffer,
-                ContentType: file.mimetype,
-            }));
+                await R2.send(new PutObjectCommand({
+                    Bucket: BUCKET,
+                    Key: uniqueName,
+                    Body: file.buffer,
+                    ContentType: file.mimetype,
+                }));
 
-            results.push({
-                url: `${PUBLIC_URL}/${uniqueName}`,
-                key: uniqueName,
-                originalName: file.originalname,
-                size: file.size,
-                type: file.mimetype,
-            });
+                results.push({
+                    url: `${PUBLIC_URL}/${uniqueName}`,
+                    key: uniqueName,
+                    originalName: file.originalname,
+                    size: file.size,
+                    type: file.mimetype,
+                });
+            } else {
+                // ---- Local fallback ----
+                const { url, key } = saveToLocalDisk(file.buffer, file.originalname, file.mimetype, folder);
+                results.push({
+                    url,
+                    key,
+                    originalName: file.originalname,
+                    size: file.size,
+                    type: file.mimetype,
+                });
+            }
         }
 
         res.status(201).json({ files: results });
@@ -120,7 +176,7 @@ router.post('/multiple', authenticateToken, upload.array('files', 20), async (re
     }
 });
 
-// DELETE /api/upload — delete a file from R2
+// DELETE /api/upload — delete a file from R2 or local disk
 router.delete('/', authenticateToken, async (req, res) => {
     try {
         const { key } = req.body;
@@ -129,10 +185,18 @@ router.delete('/', authenticateToken, async (req, res) => {
             return res.status(400).json({ error: 'File key is required.' });
         }
 
-        await R2.send(new DeleteObjectCommand({
-            Bucket: BUCKET,
-            Key: key,
-        }));
+        if (R2) {
+            await R2.send(new DeleteObjectCommand({
+                Bucket: BUCKET,
+                Key: key,
+            }));
+        } else {
+            // Delete from local disk
+            const filePath = path.join(UPLOADS_DIR, key);
+            if (fs.existsSync(filePath)) {
+                fs.unlinkSync(filePath);
+            }
+        }
 
         res.json({ message: 'File deleted.' });
     } catch (err) {

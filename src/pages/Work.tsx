@@ -53,21 +53,27 @@ const getYouTubeThumbnail = (url: string) => {
     return null;
 };
 
+const isYouTubeUrl = (url: string | null) =>
+    !!url && (url.includes('youtube.com') || url.includes('youtu.be'));
+
 const mapAlbums = (items: ContentItem[]) =>
-    items.map((i) => ({
-        title: i.title || "Untitled Album",
-        category: i.category || "Purulia Bangla",
-        image: i.media_type === 'youtube' && i.media_url
-            ? getYouTubeThumbnail(i.media_url) || albumCover
-            : i.media_url || albumCover,
-        year: i.description || "2024",
-        link: i.link_url || (i.media_type === 'youtube' && i.media_url
-            ? (i.media_url.includes('youtube.com') || i.media_url.includes('youtu.be')
-                ? i.media_url
-                : `https://www.youtube.com/watch?v=${i.media_url}`)
-            : ""),
-        mediaType: i.media_type || 'image',
-    }));
+    items.map((i) => {
+        const ytDetected = i.media_type === 'youtube' || isYouTubeUrl(i.media_url);
+        return {
+            title: i.title || "Untitled Album",
+            category: i.category || "Purulia Bangla",
+            image: ytDetected && i.media_url
+                ? getYouTubeThumbnail(i.media_url) || albumCover
+                : i.media_url || albumCover,
+            year: i.description || "2024",
+            link: i.link_url || (ytDetected && i.media_url
+                ? (i.media_url.includes('youtube.com') || i.media_url.includes('youtu.be')
+                    ? i.media_url
+                    : `https://www.youtube.com/watch?v=${i.media_url}`)
+                : ""),
+            mediaType: ytDetected ? 'youtube' : (i.media_type || 'image'),
+        };
+    });
 
 const mapFilms = (items: ContentItem[]) =>
     items.map((i) => {
