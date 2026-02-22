@@ -21,7 +21,7 @@ const extractVideoId = (url: string): string => {
 };
 
 const FeaturedFilm = () => {
-    const { items } = useContent("featured");
+    const { items } = useContent("featured_film");
     const featured = items.length > 0 ? items[0] : null;
 
     /* Use admin content or fall back to defaults */

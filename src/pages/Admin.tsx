@@ -38,29 +38,29 @@ type SeoSetting = {
 };
 
 const SECTIONS = [
-  { key: "featured", label: "⭐ Featured Film", type: "content" },
-  { key: "work_albums", label: "🎵 Albums", type: "content" },
-  { key: "work_films", label: "🎬 Films", type: "content" },
-  { key: "work_weddings", label: "💍 Weddings", type: "content" },
-  { key: "services", label: "🎥 Services", type: "content" },
-  { key: "hero", label: "🏠 Hero", type: "content" },
-  { key: "about", label: "ℹ️ About", type: "content" },
-  { key: "actress_showreel", label: "🎬 Actress Showreels", type: "content" },
-  { key: "actress_gallery", label: "📸 Actress Gallery", type: "content" },
-  { key: "inquiries", label: "📬 Inquiries", type: "inquiries" },
-  { key: "seo", label: "🔍 SEO Settings", type: "seo" },
+  { key: "work_albums", label: "\uD83C\uDFB5 Albums", type: "content" },
+  { key: "work_films", label: "\uD83C\uDFAC Films", type: "content" },
+  { key: "work_weddings", label: "\uD83D\uDC8D Weddings", type: "content" },
+  { key: "services", label: "\uD83C\uDFA5 Services", type: "content" },
+  { key: "hero", label: "\uD83C\uDFE0 Hero", type: "content" },
+  { key: "featured_film", label: "\u2B50 Featured Film", type: "content" },
+  { key: "about", label: "\u2139\uFE0F About", type: "content" },
+  { key: "actress_showreel", label: "\uD83C\uDFAC Actress Showreels", type: "content" },
+  { key: "actress_gallery", label: "\uD83D\uDCF8 Actress Gallery", type: "content" },
+  { key: "inquiries", label: "\uD83D\uDCEC Inquiries", type: "inquiries" },
+  { key: "seo", label: "\uD83D\uDD0D SEO Settings", type: "seo" },
 ];
 
 const SECTION_HINTS: Record<string, string> = {
-  featured: 'This controls the "Featured Release" video on the homepage. Add ONE item: paste your YouTube URL, set Media Type to "YouTube". The Title becomes the heading, Description shows below the video, Category shows as the badge (e.g. "Drama • Short Film • 2024").',
-  actress_showreel: 'Add YouTube video URLs here. Set Media Type to "YouTube" and paste the full YouTube link (e.g. https://youtube.com/watch?v=xxx). These appear in the Showreel section of the Actress page.',
-  actress_gallery: 'Upload photos here. Click "Add Item" → Edit → Upload an image. These appear in the Photo Portfolio gallery on the Actress page.',
-  work_albums: 'Add music album entries. Use a YouTube URL with Media Type "YouTube" for video albums, or upload a thumbnail image.',
-  work_films: 'Add film entries. Use a YouTube URL for video or upload a thumbnail.',
-  work_weddings: 'Add wedding cinematography entries. Upload thumbnail images or paste YouTube links.',
-  hero: 'Manage the homepage hero/banner section content.',
-  about: 'Manage the About page content (text + portrait image).',
-  services: 'Manage the services listed on the Services page.',
+  featured_film: "This controls the Featured Release video on the homepage. Add ONE item with a YouTube URL.",
+  actress_showreel: "Add YouTube video URLs here for the Actress page showreel section.",
+  actress_gallery: "Upload photos here for the Actress page gallery.",
+  work_albums: "Add music album entries with YouTube URLs or images.",
+  work_films: "Add film entries with YouTube URLs.",
+  work_weddings: "Add wedding entries with images or YouTube links.",
+  hero: "Manage the homepage hero/banner section.",
+  about: "Manage the About page content.",
+  services: "Manage the services listed on the Services page.",
 };
 
 const Admin = () => {

@@ -67,5 +67,15 @@ for (const file of staticFiles) {
     }
 }
 
-console.log('\n🚀 Deploy files ready! Commit and push to Hostinger.');
-console.log('💡 Note: index.dev.html is the backup for Vite builds.');
+// 4. Restore the dev index.html so future Vite builds work correctly
+//    (Vite needs <script src="/src/main.tsx"> as entry point, not the production bundle)
+if (fs.existsSync(devIndexBackup)) {
+    fs.copyFileSync(devIndexBackup, rootIndex);
+    console.log('🔄 Restored dev index.html from backup (Vite entry point preserved)');
+}
+
+console.log('\n🚀 Deploy files ready!');
+console.log('📦 Upload these to Hostinger:');
+console.log('   - index.html from dist/ (NOT the root index.html)');
+console.log('   - assets/ folder from dist/');
+console.log('   - server/ folder');
