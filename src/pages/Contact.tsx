@@ -192,7 +192,7 @@ const Contact = () => {
                                     { icon: Mail, label: "Email", detail: "rising382@gmail.com", href: "mailto:rising382@gmail.com", color: "hover:border-yellow-500/30" },
                                     { icon: Instagram, label: "Instagram", detail: "@monikasingh4185", href: "https://www.instagram.com/monikasingh4185", color: "hover:border-pink-500/30" },
                                     { icon: Facebook, label: "Facebook", detail: "MG Films Page", href: "https://www.facebook.com/share/1DzP7B65NE/", color: "hover:border-blue-400/30" },
-                                    { icon: Youtube, label: "YouTube", detail: "MG Films Channel", href: "https://youtube.com/", color: "hover:border-red-500/30" },
+                                    { icon: Youtube, label: "YouTube", detail: "MG Films Channel", href: "https://youtube.com/@risingseason", color: "hover:border-red-500/30" },
                                 ].map((link) => (
                                     <a
                                         key={link.label}

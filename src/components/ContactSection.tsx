@@ -111,7 +111,7 @@ const ContactSection = () => {
                 { icon: Phone, label: "Call Us", href: "tel:+917903832653" },
                 { icon: Instagram, label: "Instagram", href: "https://www.instagram.com/monikasingh4185" },
                 { icon: Facebook, label: "Facebook", href: "https://www.facebook.com/share/1DzP7B65NE/" },
-                { icon: Youtube, label: "YouTube", href: "https://youtube.com/" },
+                { icon: Youtube, label: "YouTube", href: "https://youtube.com/@risingseason" },
               ].map((link) => (
                 <a
                   key={link.label}
