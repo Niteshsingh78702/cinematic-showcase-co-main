@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { Phone, Instagram, Youtube, MessageCircle, MapPin, Mail, CheckCircle } from "lucide-react";
+import { Phone, Instagram, Youtube, MessageCircle, MapPin, Mail, CheckCircle, Facebook } from "lucide-react";
 
 const fadeInUp = {
     hidden: { opacity: 0, y: 30 },
@@ -187,10 +187,11 @@ const Contact = () => {
 
                             <div className="space-y-4">
                                 {[
-                                    { icon: MessageCircle, label: "WhatsApp", detail: "Chat with us instantly", href: "https://wa.me/", color: "hover:border-green-500/30" },
-                                    { icon: Phone, label: "Call Us", detail: "Direct phone call", href: "tel:", color: "hover:border-blue-500/30" },
-                                    { icon: Mail, label: "Email", detail: "Send us an email", href: "mailto:", color: "hover:border-yellow-500/30" },
-                                    { icon: Instagram, label: "Instagram", detail: "@mgfilms", href: "https://instagram.com/", color: "hover:border-pink-500/30" },
+                                    { icon: MessageCircle, label: "WhatsApp", detail: "Chat with us instantly", href: "https://wa.me/917903832653", color: "hover:border-green-500/30" },
+                                    { icon: Phone, label: "Call Us", detail: "+91 79038 32653", href: "tel:+917903832653", color: "hover:border-blue-500/30" },
+                                    { icon: Mail, label: "Email", detail: "rising382@gmail.com", href: "mailto:rising382@gmail.com", color: "hover:border-yellow-500/30" },
+                                    { icon: Instagram, label: "Instagram", detail: "@monikasingh4185", href: "https://www.instagram.com/monikasingh4185", color: "hover:border-pink-500/30" },
+                                    { icon: Facebook, label: "Facebook", detail: "MG Films Page", href: "https://www.facebook.com/share/1DzP7B65NE/", color: "hover:border-blue-400/30" },
                                     { icon: Youtube, label: "YouTube", detail: "MG Films Channel", href: "https://youtube.com/", color: "hover:border-red-500/30" },
                                 ].map((link) => (
                                     <a

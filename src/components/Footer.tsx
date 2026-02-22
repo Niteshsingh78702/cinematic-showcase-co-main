@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Instagram, Youtube, Phone, MessageCircle, Mail } from "lucide-react";
+import { Instagram, Youtube, Phone, MessageCircle, Mail, Facebook } from "lucide-react";
 
 const Footer = () => (
   <footer className="bg-background border-t border-border">
@@ -61,11 +61,12 @@ const Footer = () => (
           <h4 className="font-display font-semibold text-foreground mb-4">Connect</h4>
           <div className="space-y-3">
             {[
-              { icon: MessageCircle, label: "WhatsApp", href: "https://wa.me/" },
-              { icon: Phone, label: "Call Us", href: "tel:" },
-              { icon: Instagram, label: "Instagram", href: "https://instagram.com/" },
+              { icon: MessageCircle, label: "WhatsApp", href: "https://wa.me/917903832653" },
+              { icon: Phone, label: "Call Us", href: "tel:+917903832653" },
+              { icon: Mail, label: "Email", href: "mailto:rising382@gmail.com" },
+              { icon: Instagram, label: "Instagram", href: "https://www.instagram.com/monikasingh4185" },
+              { icon: Facebook, label: "Facebook", href: "https://www.facebook.com/share/1DzP7B65NE/" },
               { icon: Youtube, label: "YouTube", href: "https://youtube.com/" },
-              { icon: Mail, label: "Email", href: "mailto:" },
             ].map((link) => (
               <a
                 key={link.label}

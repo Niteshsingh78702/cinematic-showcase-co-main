@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Phone, Instagram, Youtube, MessageCircle } from "lucide-react";
+import { Phone, Instagram, Youtube, MessageCircle, Facebook } from "lucide-react";
 import { useState } from "react";
 
 const fadeInUp = {
@@ -15,7 +15,7 @@ const ContactSection = () => {
     const msg = encodeURIComponent(
       `Hi MG Films! I'm ${formData.name}. ${formData.message}`
     );
-    window.open(`https://wa.me/?text=${msg}`, "_blank");
+    window.open(`https://wa.me/917903832653?text=${msg}`, "_blank");
   };
 
   return (
@@ -107,9 +107,10 @@ const ContactSection = () => {
 
             <div className="space-y-4">
               {[
-                { icon: MessageCircle, label: "WhatsApp", href: "https://wa.me/" },
-                { icon: Phone, label: "Call Us", href: "tel:" },
-                { icon: Instagram, label: "Instagram", href: "https://instagram.com/" },
+                { icon: MessageCircle, label: "WhatsApp", href: "https://wa.me/917903832653" },
+                { icon: Phone, label: "Call Us", href: "tel:+917903832653" },
+                { icon: Instagram, label: "Instagram", href: "https://www.instagram.com/monikasingh4185" },
+                { icon: Facebook, label: "Facebook", href: "https://www.facebook.com/share/1DzP7B65NE/" },
                 { icon: Youtube, label: "YouTube", href: "https://youtube.com/" },
               ].map((link) => (
                 <a
