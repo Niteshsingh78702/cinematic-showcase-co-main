@@ -44,10 +44,22 @@ const SECTIONS = [
   { key: "services", label: "🎥 Services", type: "content" },
   { key: "hero", label: "🏠 Hero", type: "content" },
   { key: "about", label: "ℹ️ About", type: "content" },
-  { key: "actress", label: "👩 Actress", type: "content" },
+  { key: "actress_showreel", label: "🎬 Actress Showreels", type: "content" },
+  { key: "actress_gallery", label: "📸 Actress Gallery", type: "content" },
   { key: "inquiries", label: "📬 Inquiries", type: "inquiries" },
   { key: "seo", label: "🔍 SEO Settings", type: "seo" },
 ];
+
+const SECTION_HINTS: Record<string, string> = {
+  actress_showreel: 'Add YouTube video URLs here. Set Media Type to "YouTube" and paste the full YouTube link (e.g. https://youtube.com/watch?v=xxx). These appear in the Showreel section of the Actress page.',
+  actress_gallery: 'Upload photos here. Click "Add Item" → Edit → Upload an image. These appear in the Photo Portfolio gallery on the Actress page.',
+  work_albums: 'Add music album entries. Use a YouTube URL with Media Type "YouTube" for video albums, or upload a thumbnail image.',
+  work_films: 'Add film entries. Use a YouTube URL for video or upload a thumbnail.',
+  work_weddings: 'Add wedding cinematography entries. Upload thumbnail images or paste YouTube links.',
+  hero: 'Manage the homepage hero/banner section content.',
+  about: 'Manage the About page content (text + portrait image).',
+  services: 'Manage the services listed on the Services page.',
+};
 
 const Admin = () => {
   const [content, setContent] = useState<ContentItem[]>([]);
@@ -318,6 +330,12 @@ const Admin = () => {
                   <Plus className="w-3.5 h-3.5" /> Add Item
                 </button>
               </div>
+
+              {SECTION_HINTS[activeSection] && (
+                <p className="text-muted-foreground text-xs font-body mb-4 bg-primary/5 border border-gold/10 rounded-sm px-3 py-2">
+                  💡 {SECTION_HINTS[activeSection]}
+                </p>
+              )}
 
               {content.length === 0 && (
                 <p className="text-muted-foreground text-sm font-body">No items yet. Click "Add Item" to start.</p>

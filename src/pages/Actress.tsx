@@ -40,18 +40,37 @@ const experience = [
 const Actress = () => {
     const [lightboxOpen, setLightboxOpen] = useState(false);
     const [lightboxIndex, setLightboxIndex] = useState(0);
-    const { items: actressContent } = useContent("actress");
+    const { items: showreelContent } = useContent("actress_showreel");
+    const { items: galleryContent } = useContent("actress_gallery");
+
+    /* Extract YouTube video ID from various URL formats */
+    const extractVideoId = (url: string): string => {
+        if (!url) return "dQw4w9WgXcQ";
+        // Already a bare video ID (no slashes)
+        if (!url.includes("/") && !url.includes(".")) return url;
+        try {
+            const u = new URL(url);
+            if (u.hostname.includes("youtu.be")) return u.pathname.slice(1);
+            if (u.searchParams.get("v")) return u.searchParams.get("v")!;
+            if (u.pathname.includes("/embed/")) return u.pathname.split("/embed/")[1];
+        } catch { }
+        return url;
+    };
 
     /* Map API items to photos — use uploaded images when available */
-    const photos = actressContent.length > 0
-        ? actressContent
-            .filter((i) => i.media_url && i.media_type !== "youtube")
+    const photos = galleryContent.length > 0
+        ? galleryContent
+            .filter((i) => i.media_url)
             .map((i) => ({ src: i.media_url!, alt: i.title || "Monika Singh" }))
         : defaultPhotos;
 
-    /* Find showreel video (youtube type) from actress section */
-    const showreelItem = actressContent.find((i) => i.media_type === "youtube");
-    const showreelVideoId = showreelItem?.media_url || "dQw4w9WgXcQ";
+    /* Find showreel videos (youtube type) from actress_showreel section */
+    const showreelItems = showreelContent.filter(
+        (i) => i.media_url && (i.media_type === "youtube" || i.media_url.includes("youtube") || i.media_url.includes("youtu.be"))
+    );
+    const showreelVideoId = showreelItems.length > 0
+        ? extractVideoId(showreelItems[0].media_url!)
+        : "dQw4w9WgXcQ";
 
     return (
         <div className="min-h-screen bg-background">
@@ -176,16 +195,35 @@ const Actress = () => {
                         <div className="glow-line mt-4" />
                     </motion.div>
 
-                    <motion.div
-                        initial="hidden"
-                        whileInView="visible"
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.5, delay: 0.2 }}
-                        variants={fadeInUp}
-                        className="max-w-4xl mx-auto yt-embed-wrapper"
-                    >
-                        <YouTubeEmbed videoId={showreelVideoId} title="Monika Singh — Showreel" />
-                    </motion.div>
+                    {showreelItems.length > 1 ? (
+                        <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
+                            {showreelItems.map((item, i) => (
+                                <motion.div
+                                    key={item.id || i}
+                                    initial="hidden"
+                                    whileInView="visible"
+                                    viewport={{ once: true }}
+                                    transition={{ duration: 0.5, delay: i * 0.15 }}
+                                    variants={fadeInUp}
+                                    className="yt-embed-wrapper"
+                                >
+                                    {item.title && <p className="text-foreground font-body text-sm mb-2">{item.title}</p>}
+                                    <YouTubeEmbed videoId={extractVideoId(item.media_url!)} title={item.title || "Showreel"} />
+                                </motion.div>
+                            ))}
+                        </div>
+                    ) : (
+                        <motion.div
+                            initial="hidden"
+                            whileInView="visible"
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.5, delay: 0.2 }}
+                            variants={fadeInUp}
+                            className="max-w-4xl mx-auto yt-embed-wrapper"
+                        >
+                            <YouTubeEmbed videoId={showreelVideoId} title="Monika Singh — Showreel" />
+                        </motion.div>
+                    )}
                 </div>
             </section>
 
@@ -216,11 +254,16 @@ const Actress = () => {
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ duration: 0.4, delay: i * 0.07 }}
-                                className="gallery-card"
-                                style={{ minHeight: i % 5 === 0 ? '320px' : '240px' }}
+                                className="gallery-card overflow-hidden"
+                                style={{ height: '280px' }}
                                 onClick={() => { setLightboxIndex(i); setLightboxOpen(true); }}
                             >
-                                <img src={photo.src} alt={photo.alt} loading="lazy" />
+                                <img
+                                    src={photo.src}
+                                    alt={photo.alt}
+                                    loading="lazy"
+                                    className="w-full h-full object-cover"
+                                />
                                 <div className="card-overlay">
                                     <h3>{photo.alt.replace("Monika Singh — ", "")}</h3>
                                     <p>Monika Singh</p>
