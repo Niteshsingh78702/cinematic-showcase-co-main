@@ -255,7 +255,7 @@ const Actress = () => {
                                 viewport={{ once: true }}
                                 transition={{ duration: 0.4, delay: i * 0.07 }}
                                 className="gallery-card overflow-hidden"
-                                style={{ height: '280px' }}
+                                style={{ height: i % 3 === 0 ? '350px' : '280px' }}
                                 onClick={() => { setLightboxIndex(i); setLightboxOpen(true); }}
                             >
                                 <img
@@ -263,6 +263,7 @@ const Actress = () => {
                                     alt={photo.alt}
                                     loading="lazy"
                                     className="w-full h-full object-cover"
+                                    style={{ objectPosition: 'top center' }}
                                 />
                                 <div className="card-overlay">
                                     <h3>{photo.alt.replace("Monika Singh — ", "")}</h3>
