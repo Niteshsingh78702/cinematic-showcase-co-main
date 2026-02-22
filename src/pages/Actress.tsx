@@ -93,11 +93,11 @@ const Actress = () => {
                             transition={{ duration: 0.5 }}
                             variants={fadeInUp}
                         >
-                            <div className="gallery-card aspect-[3/4]">
+                            <div className="gallery-card aspect-[3/4] bg-black">
                                 <img
                                     src={monikaPic}
                                     alt="Monika Singh — Professional Portrait"
-                                    className="w-full h-full object-cover"
+                                    className="w-full h-full object-contain"
                                 />
                                 <div className="card-overlay">
                                     <h3>Monika Singh</h3>

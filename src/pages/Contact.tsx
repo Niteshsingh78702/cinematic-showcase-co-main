@@ -31,18 +31,42 @@ const Contact = () => {
     const [submitted, setSubmitted] = useState(false);
     const [loading, setLoading] = useState(false);
 
+    const [error, setError] = useState("");
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
 
-        // For now, simulate submission (will connect to Express API later)
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        // Build WhatsApp message with all form details
+        const msg = encodeURIComponent(
+            `Hi MG Films!\n\n` +
+            `Name: ${formData.name}\n` +
+            `Phone: ${formData.phone}\n` +
+            `Email: ${formData.email}\n` +
+            `Event: ${formData.eventType}\n\n` +
+            `Message: ${formData.message}`
+        );
+        window.open(`https://wa.me/917903832653?text=${msg}`, "_blank");
+
+        // Also try to save to database in background (won't block)
+        try {
+            const apiBase = import.meta.env.VITE_API_URL || "";
+            fetch(`${apiBase}/api/inquiries`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    name: formData.name,
+                    phone: formData.phone,
+                    email: formData.email,
+                    event_type: formData.eventType,
+                    message: formData.message,
+                }),
+            }).catch(() => { });
+        } catch { }
 
         setSubmitted(true);
         setLoading(false);
         setFormData({ name: "", phone: "", email: "", eventType: "", message: "" });
-
-        // Reset success message after 5 sec
         setTimeout(() => setSubmitted(false), 5000);
     };
 
@@ -94,6 +118,16 @@ const Contact = () => {
                                     <p className="text-green-400 font-body text-sm">
                                         Thank you! Your message has been sent successfully. We'll get back to you soon.
                                     </p>
+                                </motion.div>
+                            )}
+
+                            {error && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: -10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className="flex items-center gap-3 p-4 mb-6 rounded-sm border border-red-500/30 bg-red-500/10"
+                                >
+                                    <p className="text-red-400 font-body text-sm">{error}</p>
                                 </motion.div>
                             )}
 

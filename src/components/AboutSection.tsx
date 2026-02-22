@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { useContent } from "@/hooks/useContent";
-import actressPortrait from "@/assets/actress-portrait.jpg";
+import monikaPic from "@/assets/monika.png";
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 30 },
@@ -16,7 +16,7 @@ const AboutSection = () => {
   const description = aboutData?.description || `MG Films is a creative production house specializing in regional music albums, short films, and premium wedding cinematography. We bring stories to life through the rich cultural traditions of Purulia Bangla, Khortha, and Santhali art forms.
 
 Our debut short film "Milloner Bela" (2:10 min) showcases our commitment to powerful storytelling with cinematic quality.`;
-  const portraitImage = aboutData?.media_url || actressPortrait;
+  const portraitImage = aboutData?.media_url || monikaPic;
 
   return (
     <section id="about" className="py-24 bg-gradient-dark">
@@ -79,7 +79,7 @@ Our debut short film "Milloner Bela" (2:10 min) showcases our commitment to powe
               <img
                 src={portraitImage}
                 alt="Monika Singh - Actress & Co-Founder"
-                className="w-full h-[500px] object-cover"
+                className="w-full h-[500px] object-contain bg-black"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-transparent" />
               <div className="absolute bottom-0 left-0 right-0 p-6">

@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import actressPortrait from "@/assets/actress-portrait.jpg";
+import monikaPic from "@/assets/monika.png";
 import { Heart, Film, Music, Award, Users } from "lucide-react";
 
 const fadeInUp = {
@@ -167,9 +167,9 @@ const About = () => {
                         >
                             <div className="relative overflow-hidden rounded-sm shadow-gold">
                                 <img
-                                    src={actressPortrait}
+                                    src={monikaPic}
                                     alt="Monika Singh - Actress & Co-Founder"
-                                    className="w-full h-[500px] object-cover"
+                                    className="w-full h-[500px] object-contain bg-black"
                                     loading="lazy"
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-transparent" />
