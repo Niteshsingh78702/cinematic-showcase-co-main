@@ -34,12 +34,12 @@ const defaultFilms = [
 ];
 
 const defaultWeddingPhotos = [
-    { src: heroBg, alt: "Grand Reception Setup" },
-    { src: albumCover, alt: "Bridal Portrait" },
-    { src: filmCover, alt: "Ceremony Moments" },
-    { src: weddingCover, alt: "Sangeet Night" },
-    { src: actressPortrait, alt: "Couple Portrait" },
-    { src: heroBg, alt: "Mandap Decoration" },
+    { src: heroBg, alt: "Grand Reception Setup", mediaType: "image" as const, videoId: null as string | null, link: "" },
+    { src: albumCover, alt: "Bridal Portrait", mediaType: "image" as const, videoId: null as string | null, link: "" },
+    { src: filmCover, alt: "Ceremony Moments", mediaType: "image" as const, videoId: null as string | null, link: "" },
+    { src: weddingCover, alt: "Sangeet Night", mediaType: "image" as const, videoId: null as string | null, link: "" },
+    { src: actressPortrait, alt: "Couple Portrait", mediaType: "image" as const, videoId: null as string | null, link: "" },
+    { src: heroBg, alt: "Mandap Decoration", mediaType: "image" as const, videoId: null as string | null, link: "" },
 ];
 
 /* ---------- helpers — map API data to display ---------- */
@@ -98,10 +98,23 @@ const mapFilms = (items: ContentItem[]) =>
     });
 
 const mapWeddings = (items: ContentItem[]) =>
-    items.map((i) => ({
-        src: i.media_url || weddingCover,
-        alt: i.title || "Wedding Moment",
-    }));
+    items.map((i) => {
+        const ytDetected = i.media_type === 'youtube' || isYouTubeUrl(i.media_url);
+        const videoId = ytDetected && i.media_url ? getVideoId(i.media_url) : null;
+        return {
+            src: ytDetected && i.media_url
+                ? getYouTubeThumbnail(i.media_url) || weddingCover
+                : i.media_url || weddingCover,
+            alt: i.title || "Wedding Moment",
+            mediaType: ytDetected ? 'youtube' : 'image',
+            videoId,
+            link: i.link_url || (ytDetected && i.media_url
+                ? (i.media_url.includes('youtube.com') || i.media_url.includes('youtu.be')
+                    ? i.media_url
+                    : `https://www.youtube.com/watch?v=${i.media_url}`)
+                : ''),
+        };
+    });
 
 /* ---------- tabs / categories ---------- */
 const tabs = [
@@ -287,7 +300,7 @@ const Work = () => {
                             Every wedding is a story. We capture the emotions, rituals, and celebrations that make your day unforgettable.
                         </motion.p>
 
-                        {/* Masonry Gallery */}
+                        {/* Masonry Gallery — supports both photos and YouTube videos */}
                         <div className="gallery-masonry max-w-6xl mx-auto">
                             {weddingPhotos.map((photo, i) => (
                                 <motion.div
@@ -296,20 +309,34 @@ const Work = () => {
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ duration: 0.4, delay: i * 0.06 }}
                                     className="gallery-card"
-                                    style={{ minHeight: i % 7 === 0 ? "320px" : "220px" }}
-                                    onClick={() => { setLightboxIndex(i); setLightboxOpen(true); }}
+                                    style={{ minHeight: i % 7 === 0 ? "320px" : "220px", cursor: photo.mediaType === 'youtube' ? 'pointer' : 'pointer' }}
+                                    onClick={() => {
+                                        if (photo.mediaType === 'youtube' && photo.videoId) {
+                                            setYtModal({ videoId: photo.videoId, title: photo.alt, link: photo.link || '' });
+                                        } else {
+                                            setLightboxIndex(i); setLightboxOpen(true);
+                                        }
+                                    }}
                                 >
                                     <img src={photo.src} alt={photo.alt} loading="lazy" />
+                                    {photo.mediaType === 'youtube' && (
+                                        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 5, pointerEvents: 'none' }}>
+                                            <svg width="56" height="56" viewBox="0 0 24 24" fill="none">
+                                                <circle cx="12" cy="12" r="12" fill="rgba(0,0,0,0.6)" />
+                                                <polygon points="10,8 17,12 10,16" fill="white" />
+                                            </svg>
+                                        </div>
+                                    )}
                                     <div className="card-overlay">
                                         <h3>{photo.alt}</h3>
-                                        <p>Wedding Collection</p>
+                                        <p>{photo.mediaType === 'youtube' ? '▶ Watch Video' : 'Wedding Collection'}</p>
                                     </div>
                                 </motion.div>
                             ))}
                         </div>
 
                         <ImageLightbox
-                            images={weddingPhotos}
+                            images={weddingPhotos.filter(p => p.mediaType !== 'youtube')}
                             initialIndex={lightboxIndex}
                             isOpen={lightboxOpen}
                             onClose={() => setLightboxOpen(false)}

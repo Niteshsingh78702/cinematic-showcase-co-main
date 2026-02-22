@@ -38,6 +38,7 @@ type SeoSetting = {
 };
 
 const SECTIONS = [
+  { key: "featured", label: "⭐ Featured Film", type: "content" },
   { key: "work_albums", label: "🎵 Albums", type: "content" },
   { key: "work_films", label: "🎬 Films", type: "content" },
   { key: "work_weddings", label: "💍 Weddings", type: "content" },
@@ -51,6 +52,7 @@ const SECTIONS = [
 ];
 
 const SECTION_HINTS: Record<string, string> = {
+  featured: 'This controls the "Featured Release" video on the homepage. Add ONE item: paste your YouTube URL, set Media Type to "YouTube". The Title becomes the heading, Description shows below the video, Category shows as the badge (e.g. "Drama • Short Film • 2024").',
   actress_showreel: 'Add YouTube video URLs here. Set Media Type to "YouTube" and paste the full YouTube link (e.g. https://youtube.com/watch?v=xxx). These appear in the Showreel section of the Actress page.',
   actress_gallery: 'Upload photos here. Click "Add Item" → Edit → Upload an image. These appear in the Photo Portfolio gallery on the Actress page.',
   work_albums: 'Add music album entries. Use a YouTube URL with Media Type "YouTube" for video albums, or upload a thumbnail image.',
@@ -363,7 +365,11 @@ const Admin = () => {
                           <input
                             placeholder="Media URL (or upload below)"
                             value={editForm.media_url || ""}
-                            onChange={(e) => setEditForm((p) => ({ ...p, media_url: e.target.value }))}
+                            onChange={(e) => {
+                              const url = e.target.value;
+                              const isYT = url.includes('youtube.com') || url.includes('youtu.be');
+                              setEditForm((p) => ({ ...p, media_url: url, ...(isYT ? { media_type: 'youtube' } : {}) }));
+                            }}
                             className="flex-1 bg-secondary border border-border rounded-sm px-3 py-2 text-foreground font-body text-sm focus:outline-none focus:border-primary/50"
                           />
                           <label className={`flex items-center gap-1 px-3 py-2 text-xs font-body border border-gold/30 text-primary rounded-sm cursor-pointer hover:bg-primary/10 transition-colors ${uploading ? 'opacity-50 pointer-events-none' : ''}`}>
@@ -443,7 +449,21 @@ const Admin = () => {
                         />
                         {editForm.media_url && (
                           <div className="mt-2">
-                            <img src={editForm.media_url} alt="Preview" className="w-32 h-20 object-cover rounded" />
+                            {(editForm.media_type === 'youtube' || editForm.media_url.includes('youtube.com') || editForm.media_url.includes('youtu.be')) ? (
+                              <div className="flex items-center gap-2">
+                                <img
+                                  src={(() => {
+                                    const match = editForm.media_url!.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|shorts\/))([\w-]{11})/);
+                                    return match ? `https://img.youtube.com/vi/${match[1]}/mqdefault.jpg` : '';
+                                  })()}
+                                  alt="YouTube Preview"
+                                  className="w-32 h-20 object-cover rounded"
+                                />
+                                <span className="text-xs text-green-400 font-body">✅ YouTube detected</span>
+                              </div>
+                            ) : (
+                              <img src={editForm.media_url} alt="Preview" className="w-32 h-20 object-cover rounded" />
+                            )}
                           </div>
                         )}
                         <div className="flex gap-2">

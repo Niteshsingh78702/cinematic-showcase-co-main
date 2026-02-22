@@ -1,12 +1,50 @@
 import { motion } from "framer-motion";
 import YouTubeEmbed from "./YouTubeEmbed";
+import { useContent } from "@/hooks/useContent";
 
 const fadeInUp = {
     hidden: { opacity: 0, y: 30 },
     visible: { opacity: 1, y: 0 },
 };
 
+/* Extract YouTube video ID from various URL formats */
+const extractVideoId = (url: string): string => {
+    if (!url) return "dQw4w9WgXcQ";
+    if (!url.includes("/") && !url.includes(".")) return url;
+    try {
+        const u = new URL(url);
+        if (u.hostname.includes("youtu.be")) return u.pathname.slice(1);
+        if (u.searchParams.get("v")) return u.searchParams.get("v")!;
+        if (u.pathname.includes("/embed/")) return u.pathname.split("/embed/")[1];
+    } catch { }
+    return url;
+};
+
 const FeaturedFilm = () => {
+    const { items } = useContent("featured");
+    const featured = items.length > 0 ? items[0] : null;
+
+    /* Use admin content or fall back to defaults */
+    const videoId = featured?.media_url ? extractVideoId(featured.media_url) : "dQw4w9WgXcQ";
+    const title = featured?.title || "Milloner Bela";
+    const description = featured?.description ||
+        "A poignant short film that explores human emotions through the lens of regional storytelling. Directed with cinematic precision, Milloner Bela showcases the depth of Purulia Bangla culture and the raw talent of our lead actress, Monika Singh.";
+    const category = featured?.category || "Drama • Short Film • 2024";
+
+    /* Parse credits from link_url field (format: Director=MG Films|Lead Actress=Monika Singh|Genre=Drama|Language=Purulia Bangla) */
+    const defaultCredits = [
+        { label: "Director", value: "MG Films" },
+        { label: "Lead Actress", value: "Monika Singh" },
+        { label: "Genre", value: "Drama / Short Film" },
+        { label: "Language", value: "Purulia Bangla" },
+    ];
+    const credits = featured?.link_url
+        ? featured.link_url.split("|").map((c) => {
+            const [label, value] = c.split("=");
+            return { label: label?.trim() || "", value: value?.trim() || "" };
+        }).filter((c) => c.label && c.value)
+        : defaultCredits;
+
     return (
         <section className="py-24 bg-gradient-dark relative overflow-hidden">
             {/* Background glow accent */}
@@ -23,7 +61,7 @@ const FeaturedFilm = () => {
                 >
                     <p className="text-primary text-sm tracking-[0.3em] uppercase mb-3 font-body">Featured Release</p>
                     <h2 className="text-3xl md:text-5xl font-display font-bold text-gradient-gold mb-4">
-                        Milloner Bela
+                        {title}
                     </h2>
                     <div className="glow-line mt-4" />
                 </motion.div>
@@ -38,7 +76,7 @@ const FeaturedFilm = () => {
                         variants={fadeInUp}
                         className="yt-embed-wrapper"
                     >
-                        <YouTubeEmbed videoId="dQw4w9WgXcQ" title="Milloner Bela — Official Trailer" />
+                        <YouTubeEmbed videoId={videoId} title={`${title} — Official Trailer`} />
                     </motion.div>
 
                     {/* Details */}
@@ -49,21 +87,14 @@ const FeaturedFilm = () => {
                         transition={{ duration: 0.5, delay: 0.3 }}
                         variants={fadeInUp}
                     >
-                        <span className="category-badge mb-4 inline-flex">Drama • Short Film • 2024</span>
+                        <span className="category-badge mb-4 inline-flex">{category}</span>
                         <p className="text-muted-foreground font-body leading-relaxed mt-4 mb-6">
-                            A poignant short film that explores human emotions through the lens of regional storytelling.
-                            Directed with cinematic precision, <em>Milloner Bela</em> showcases the depth of
-                            Purulia Bangla culture and the raw talent of our lead actress, Monika Singh.
+                            {description}
                         </p>
 
                         {/* Credits */}
                         <div className="space-y-3 mb-8">
-                            {[
-                                { label: "Director", value: "MG Films" },
-                                { label: "Lead Actress", value: "Monika Singh" },
-                                { label: "Genre", value: "Drama / Short Film" },
-                                { label: "Language", value: "Purulia Bangla" },
-                            ].map((credit) => (
+                            {credits.map((credit) => (
                                 <div key={credit.label} className="flex items-center gap-3">
                                     <span className="text-xs text-muted-foreground font-body uppercase tracking-wider min-w-[90px]">{credit.label}</span>
                                     <span className="w-px h-3 bg-border" />
