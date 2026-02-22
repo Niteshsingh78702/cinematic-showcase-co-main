@@ -1,0 +1,12 @@
+RewriteEngine On
+
+# If it's an API request, proxy to Node.js backend (port 3000)
+RewriteCond %{REQUEST_URI} ^/api/ [NC]
+RewriteRule ^(.*)$ http://127.0.0.1:3000/$1 [P,L]
+
+# Don't rewrite files or directories that exist
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Send everything else to index.html (SPA routing)
+RewriteRule ^ index.html [QSA,L]
