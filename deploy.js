@@ -1,9 +1,13 @@
 /**
- * Post-build script for Hostinger deployment.
- * Copies the production build files from dist/ to the project root
- * so that Hostinger's Apache can serve them directly.
- *
- * Run: node deploy.js   (called automatically via `npm run build:deploy`)
+ * Post-build deploy script for Hostinger.
+ * 
+ * Hostinger's Apache serves from the project root, so we need production
+ * files (index.html + assets/) at the root level, not just in dist/.
+ * 
+ * IMPORTANT: This script backs up the dev index.html before overwriting it,
+ * because Vite needs the dev version (with /src/main.tsx) to build correctly.
+ * 
+ * Usage: npm run build:deploy
  */
 import fs from 'fs';
 import path from 'path';
@@ -13,9 +17,16 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const distDir = path.join(__dirname, 'dist');
 const rootDir = __dirname;
 
-// 1. Copy dist/index.html → root index.html
-const distIndex = path.join(distDir, 'index.html');
+// 0. Back up the dev index.html (Vite needs this for builds)
 const rootIndex = path.join(rootDir, 'index.html');
+const devIndexBackup = path.join(rootDir, 'index.dev.html');
+if (fs.existsSync(rootIndex)) {
+    fs.copyFileSync(rootIndex, devIndexBackup);
+    console.log('📋 Backed up dev index.html → index.dev.html');
+}
+
+// 1. Copy dist/index.html → root index.html (production version)
+const distIndex = path.join(distDir, 'index.html');
 if (fs.existsSync(distIndex)) {
     fs.copyFileSync(distIndex, rootIndex);
     console.log('✅ Copied dist/index.html → index.html');
@@ -57,3 +68,4 @@ for (const file of staticFiles) {
 }
 
 console.log('\n🚀 Deploy files ready! Commit and push to Hostinger.');
+console.log('💡 Note: index.dev.html is the backup for Vite builds.');

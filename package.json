@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "npx vite build",
-    "build:deploy": "npx vite build && node deploy.js",
+    "build:deploy": "node -e \"const fs=require('fs'),p=require('path');const b=p.join('.','index.dev.html'),r=p.join('.','index.html');if(fs.existsSync(b)){fs.copyFileSync(b,r);console.log('Restored dev index.html')}\" && npx vite build && node deploy.js",
     "postinstall": "cd server && npm install",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
