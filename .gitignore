@@ -4,7 +4,6 @@ server/uploads/
 
 # Frontend
 node_modules
-dist
 .env
 index.dev.html
 # Editor
