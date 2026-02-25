@@ -29,7 +29,7 @@ const defaultAlbums = [
 ];
 
 const defaultFilms = [
-    { title: "Milloner Bela", videoId: "dQw4w9WgXcQ", year: "2024", genre: "Drama • Short Film" },
+    { title: "Milloner Bela", videoId: "dQw4w9WgXcQ", year: "2024", genre: "Drama • Picture Film" },
     { title: "Purulia Express", videoId: "dQw4w9WgXcQ", year: "2023", genre: "Adventure • Short Film" },
 ];
 

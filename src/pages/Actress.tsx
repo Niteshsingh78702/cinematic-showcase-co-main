@@ -29,7 +29,7 @@ const defaultPhotos = [
 ];
 
 const experience = [
-    { year: "2024", work: "Lead Actress — Milloner Bela (Short Film)", highlight: true },
+    { year: "2024", work: "Lead Actress — Milloner Bela (Picture Film)", highlight: true },
     { year: "2023", work: "Music Video Lead — Mon Bhore Jai (Purulia Bangla Album)", highlight: false },
     { year: "2023", work: "Featured Artist — Khortha Melodies (Music Album)", highlight: false },
     { year: "2022", work: "Lead Artist — Santhali Serenade (Santhali Album)", highlight: false },

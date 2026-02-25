@@ -19,7 +19,7 @@ const categories = [
     title: "Films",
     subtitle: "Short Films & Features",
     image: filmCover,
-    items: ["Milloner Bela (2:10 min)", "Script to Screen", "Regional Storytelling", "Cinematic Production"],
+    items: ["Milloner Bela (2:10:10)", "Script to Screen", "Regional Storytelling", "Cinematic Production"],
   },
   {
     title: "Wedding & Events",

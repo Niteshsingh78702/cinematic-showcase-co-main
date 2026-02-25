@@ -56,7 +56,7 @@ const About = () => {
                                 and a commitment to quality that sets us apart.
                             </p>
                             <p className="text-muted-foreground font-body leading-relaxed">
-                                Our debut short film <span className="text-primary font-medium">"Milloner Bela"</span> (2:10 min)
+                                Our debut picture film <span className="text-primary font-medium">"Milloner Bela"</span> (2:10:10)
                                 showcases our dedication to powerful regional storytelling with professional cinematic quality.
                             </p>
                         </motion.div>

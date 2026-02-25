@@ -15,7 +15,7 @@ const AboutSection = () => {
   const heading = aboutData?.title || "From Regional Roots to Big Screens";
   const description = aboutData?.description || `MG Films is a creative production house specializing in regional music albums, short films, and premium wedding cinematography. We bring stories to life through the rich cultural traditions of Purulia Bangla, Khortha, and Santhali art forms.
 
-Our debut short film "Milloner Bela" (2:10 min) showcases our commitment to powerful storytelling with cinematic quality.`;
+Our debut picture film "Milloner Bela" (2:10:10) showcases our commitment to powerful storytelling with cinematic quality.`;
   const portraitImage = aboutData?.media_url || monikaPic;
 
   return (
