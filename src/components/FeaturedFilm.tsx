@@ -29,13 +29,13 @@ const FeaturedFilm = () => {
     const title = featured?.title || "Milloner Bela";
     const description = featured?.description ||
         "A poignant picture film that explores human emotions through the lens of regional storytelling. Directed with cinematic precision, Milloner Bela showcases the depth of Purulia Bangla culture and the raw talent of our lead actress, Monika Singh.";
-    const category = featured?.category || "Drama • Short Film • 2024";
+    const category = featured?.category || "Drama • Picture Film • 2024";
 
     /* Parse credits from link_url field (format: Director=MG Films|Lead Actress=Monika Singh|Genre=Drama|Language=Purulia Bangla) */
     const defaultCredits = [
         { label: "Director", value: "MG Films" },
         { label: "Lead Actress", value: "Monika Singh" },
-        { label: "Genre", value: "Drama / Short Film" },
+        { label: "Genre", value: "Drama / Picture Film" },
         { label: "Language", value: "Purulia Bangla" },
     ];
     const credits = featured?.link_url
