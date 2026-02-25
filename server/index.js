@@ -53,20 +53,39 @@ app.get('/api/debug', async (req, res) => {
     } catch (err) {
         dbStatus = `❌ ${err.message}`;
     }
+
+    const distPath = path.join(__dirname, '..', 'dist');
+    let distFiles = [];
+    try {
+        if (fs.existsSync(distPath)) {
+            distFiles = fs.readdirSync(distPath);
+        }
+    } catch (e) {
+        distFiles = [`error: ${e.message}`];
+    }
+
     res.json({
         database: dbStatus,
         NODE_ENV: process.env.NODE_ENV || 'not set',
+        distPath: distPath,
+        distExists: fs.existsSync(distPath),
+        distFiles: distFiles,
+        cwd: process.cwd(),
+        dirname: __dirname,
     });
 });
 
-// Serve static frontend (always — dist is committed to repo)
+// Serve static frontend — always register (dist is committed to repo)
 const distPath = path.join(__dirname, '..', 'dist');
-if (fs.existsSync(distPath)) {
-    app.use(express.static(distPath));
-    app.get('*', (req, res) => {
-        res.sendFile(path.join(distPath, 'index.html'));
-    });
-}
+app.use(express.static(distPath));
+app.get('*', (req, res) => {
+    const indexPath = path.join(distPath, 'index.html');
+    if (fs.existsSync(indexPath)) {
+        res.sendFile(indexPath);
+    } else {
+        res.status(404).send(`Not Found. distPath=${distPath}, exists=${fs.existsSync(distPath)}, indexExists=${fs.existsSync(indexPath)}`);
+    }
+});
 
 // Initialize database tables on startup
 initDatabase().then(() => {
