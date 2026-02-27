@@ -6,22 +6,8 @@ interface YouTubeEmbedProps {
   className?: string;
 }
 
-const isValidVideoId = (id: string) => /^[\w-]{11}$/.test(id);
-
 const YouTubeEmbed = ({ videoId, title = "Video", className = "" }: YouTubeEmbedProps) => {
   const [loaded, setLoaded] = useState(false);
-
-  // If videoId is invalid, show an error placeholder
-  if (!videoId || !isValidVideoId(videoId)) {
-    return (
-      <div className={`film-error-card ${className}`}>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-          <path d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" />
-        </svg>
-        <p>Video unavailable</p>
-      </div>
-    );
-  }
 
   if (!loaded) {
     return (
@@ -31,19 +17,14 @@ const YouTubeEmbed = ({ videoId, title = "Video", className = "" }: YouTubeEmbed
         role="button"
         aria-label={`Play ${title}`}
       >
-        {/* High-quality thumbnail with fallback chain */}
+        {/* High-quality thumbnail */}
         <img
           src={`https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`}
           alt={title}
           className="absolute inset-0 w-full h-full object-cover transition-all duration-700 group-hover:scale-105 group-hover:brightness-75"
           loading="lazy"
           onError={(e) => {
-            const img = e.target as HTMLImageElement;
-            if (img.src.includes("maxresdefault")) {
-              img.src = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
-            } else if (img.src.includes("hqdefault")) {
-              img.src = `https://img.youtube.com/vi/${videoId}/sddefault.jpg`;
-            }
+            (e.target as HTMLImageElement).src = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
           }}
         />
 

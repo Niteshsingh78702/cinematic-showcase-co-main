@@ -20,17 +20,17 @@ const fadeInUp = {
 
 /* ---------- default (fallback) data ---------- */
 const defaultAlbums = [
-    { title: "Mon Bhore Jai", category: "Purulia Bangla", image: albumCover, year: "2024", link: "", mediaType: "image", videoId: null as string | null },
-    { title: "Khortha Melodies", category: "Khortha", image: filmCover, year: "2023", link: "", mediaType: "image", videoId: null as string | null },
-    { title: "Santhali Serenade", category: "Santhali", image: weddingCover, year: "2023", link: "", mediaType: "image", videoId: null as string | null },
-    { title: "Dil Ka Dard", category: "Purulia Bangla", image: heroBg, year: "2024", link: "", mediaType: "image", videoId: null as string | null },
-    { title: "Prem Kahani", category: "Khortha", image: actressPortrait, year: "2023", link: "", mediaType: "image", videoId: null as string | null },
-    { title: "Jharkhand Ki Rani", category: "Santhali", image: albumCover, year: "2022", link: "", mediaType: "image", videoId: null as string | null },
+    { title: "Mon Bhore Jai", category: "Purulia Bangla", image: albumCover, year: "2024", link: "", mediaType: "image" },
+    { title: "Khortha Melodies", category: "Khortha", image: filmCover, year: "2023", link: "", mediaType: "image" },
+    { title: "Santhali Serenade", category: "Santhali", image: weddingCover, year: "2023", link: "", mediaType: "image" },
+    { title: "Dil Ka Dard", category: "Purulia Bangla", image: heroBg, year: "2024", link: "", mediaType: "image" },
+    { title: "Prem Kahani", category: "Khortha", image: actressPortrait, year: "2023", link: "", mediaType: "image" },
+    { title: "Jharkhand Ki Rani", category: "Santhali", image: albumCover, year: "2022", link: "", mediaType: "image" },
 ];
 
 const defaultFilms = [
-    { title: "Milloner Bela", videoId: "dQw4w9WgXcQ", year: "2024", genre: "Drama • Picture Film", description: "", youtubeUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ" },
-    { title: "Purulia Express", videoId: "dQw4w9WgXcQ", year: "2023", genre: "Adventure • Short Film", description: "", youtubeUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ" },
+    { title: "Milloner Bela", videoId: "dQw4w9WgXcQ", year: "2024", genre: "Drama • Picture Film" },
+    { title: "Purulia Express", videoId: "dQw4w9WgXcQ", year: "2023", genre: "Adventure • Short Film" },
 ];
 
 const defaultWeddingPhotos = [
@@ -46,7 +46,7 @@ const defaultWeddingPhotos = [
 const getYouTubeThumbnail = (url: string) => {
     // Extract video ID from various YouTube URL formats
     let videoId = url;
-    const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|shorts\/))([\w-]{11})/);
+    const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|shorts\/))([\\w-]{11})/);
     if (match) videoId = match[1];
     // If it's already just an ID (11 chars)
     if (/^[\w-]{11}$/.test(videoId)) return `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
@@ -57,7 +57,7 @@ const isYouTubeUrl = (url: string | null) =>
     !!url && (url.includes('youtube.com') || url.includes('youtu.be'));
 
 const getVideoId = (url: string): string | null => {
-    const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|shorts\/))([\w-]{11})/);
+    const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|shorts\/))([\\w-]{11})/);
     return match ? match[1] : (/^[\w-]{11}$/.test(url) ? url : null);
 };
 
@@ -85,24 +85,15 @@ const mapAlbums = (items: ContentItem[]) =>
 const mapFilms = (items: ContentItem[]) =>
     items.map((i) => {
         // Extract video ID from full YouTube URLs
-        let videoId: string | null = null;
-        if (i.media_url) {
-            const match = i.media_url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|shorts\/))([\w-]{11})/);
-            if (match) {
-                videoId = match[1];
-            } else if (/^[\w-]{11}$/.test(i.media_url)) {
-                videoId = i.media_url;
-            }
-        }
-        // Build a direct YouTube watch URL
-        const youtubeUrl = videoId ? `https://www.youtube.com/watch?v=${videoId}` : (i.link_url || null);
+        let videoId = i.media_url || "dQw4w9WgXcQ";
+        const match = videoId.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|shorts\/))([\\w-]{11})/);
+        if (match) videoId = match[1];
         return {
             title: i.title || "Untitled Film",
-            videoId: videoId || "",
+            videoId,
             year: i.link_url || "2024",
             genre: i.category || "Drama • Short Film",
             description: i.description || "",
-            youtubeUrl,
         };
     });
 
@@ -262,65 +253,36 @@ const Work = () => {
             {!loading && activeTab === "films" && (
                 <section className="py-16 bg-background">
                     <div className="container mx-auto px-6">
-                        {films.length === 0 ? (
-                            <motion.div
-                                initial="hidden"
-                                animate="visible"
-                                variants={fadeInUp}
-                                className="text-center py-20 max-w-md mx-auto"
-                            >
-                                <svg className="w-16 h-16 mx-auto mb-6 text-muted-foreground opacity-40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                                    <path d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" />
-                                </svg>
-                                <h3 className="text-xl font-display font-semibold text-foreground mb-2">Coming Soon</h3>
-                                <p className="text-muted-foreground font-body text-sm">New films and trailers are being added. Stay tuned!</p>
-                            </motion.div>
-                        ) : (
-                            <div className="space-y-10 max-w-5xl mx-auto">
-                                {films.map((film, i) => (
-                                    <motion.div
-                                        key={film.title + i}
-                                        initial="hidden"
-                                        whileInView="visible"
-                                        viewport={{ once: true }}
-                                        transition={{ duration: 0.5, delay: i * 0.15 }}
-                                        variants={fadeInUp}
-                                        className="film-card"
-                                    >
-                                        <div className="grid md:grid-cols-[1.6fr_1fr] gap-0">
-                                            <div className="yt-embed-wrapper border-0 rounded-none shadow-none">
-                                                <YouTubeEmbed videoId={film.videoId} title={film.title} />
-                                            </div>
-                                            <div className="p-6 md:p-8 flex flex-col justify-center">
-                                                <span className="text-primary text-xs tracking-[0.2em] uppercase font-body mb-2">{film.genre}</span>
-                                                <h3 className="text-2xl md:text-3xl font-display font-bold text-foreground mb-3">{film.title}</h3>
-                                                {film.description && (
-                                                    <p className="text-muted-foreground font-body text-sm leading-relaxed mb-4">
-                                                        {film.description}
-                                                    </p>
-                                                )}
-                                                <div className="flex items-center gap-3 mt-auto flex-wrap">
-                                                    <span className="text-xs text-muted-foreground font-body border border-border px-3 py-1 rounded-sm">{film.year}</span>
-                                                    <span className="text-xs text-muted-foreground font-body">MG Films Production</span>
-                                                    {film.youtubeUrl && (
-                                                        <a
-                                                            href={film.youtubeUrl}
-                                                            target="_blank"
-                                                            rel="noopener noreferrer"
-                                                            className="ml-auto text-primary text-xs font-body hover:underline flex items-center gap-1 transition-colors"
-                                                            onClick={(e) => e.stopPropagation()}
-                                                        >
-                                                            Watch on YouTube
-                                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg>
-                                                        </a>
-                                                    )}
-                                                </div>
+                        <div className="space-y-10 max-w-5xl mx-auto">
+                            {films.map((film, i) => (
+                                <motion.div
+                                    key={film.title}
+                                    initial="hidden"
+                                    whileInView="visible"
+                                    viewport={{ once: true }}
+                                    transition={{ duration: 0.5, delay: i * 0.15 }}
+                                    variants={fadeInUp}
+                                    className="film-card"
+                                >
+                                    <div className="grid md:grid-cols-[1.6fr_1fr] gap-0">
+                                        <div className="yt-embed-wrapper border-0 rounded-none shadow-none">
+                                            <YouTubeEmbed videoId={film.videoId} title={film.title} />
+                                        </div>
+                                        <div className="p-6 md:p-8 flex flex-col justify-center">
+                                            <span className="text-primary text-xs tracking-[0.2em] uppercase font-body mb-2">{film.genre}</span>
+                                            <h3 className="text-2xl md:text-3xl font-display font-bold text-foreground mb-3">{film.title}</h3>
+                                            <p className="text-muted-foreground font-body text-sm leading-relaxed mb-4">
+                                                {film.description || "A cinematic production by MG Films, bringing regional stories to life with professional cinematography."}
+                                            </p>
+                                            <div className="flex items-center gap-3 mt-auto">
+                                                <span className="text-xs text-muted-foreground font-body border border-border px-3 py-1 rounded-sm">{film.year}</span>
+                                                <span className="text-xs text-muted-foreground font-body">MG Films Production</span>
                                             </div>
                                         </div>
-                                    </motion.div>
-                                ))}
-                            </div>
-                        )}
+                                    </div>
+                                </motion.div>
+                            ))}
+                        </div>
                     </div>
                 </section>
             )}

@@ -293,52 +293,6 @@
     0 0 24px hsl(43, 80%, 55%, 0.08);
 }
 
-/* Film card stacks vertically on mobile */
-@media (max-width: 767px) {
-  .film-card .grid {
-    grid-template-columns: 1fr !important;
-  }
-}
-
-/* Error/missing video placeholder */
-.film-error-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  aspect-ratio: 16/9;
-  background: linear-gradient(135deg, hsl(20, 10%, 6%), hsl(20, 10%, 10%));
-  border: 1px dashed hsl(30, 10%, 22%);
-  border-radius: 6px;
-  color: hsl(30, 10%, 40%);
-  gap: 12px;
-  padding: 2rem;
-  text-align: center;
-}
-
-.film-error-card svg {
-  width: 48px;
-  height: 48px;
-  opacity: 0.4;
-}
-
-.film-error-card p {
-  font-family: 'DM Sans', sans-serif;
-  font-size: 0.85rem;
-}
-
-/* Skeleton for video aspect ratio */
-.skeleton-video {
-  aspect-ratio: 16 / 9;
-  background: linear-gradient(90deg,
-      hsl(20, 10%, 8%) 25%,
-      hsl(20, 10%, 12%) 50%,
-      hsl(20, 10%, 8%) 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s ease-in-out infinite;
-  border-radius: 6px;
-}
-
 /* Category badge */
 .category-badge {
   display: inline-flex;

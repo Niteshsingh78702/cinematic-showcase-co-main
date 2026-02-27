@@ -63,27 +63,6 @@ const SECTION_HINTS: Record<string, string> = {
   services: "Manage the services listed on the Services page.",
 };
 
-/* Helper: extract YouTube video ID from a URL */
-const extractYouTubeId = (url: string | null): string | null => {
-  if (!url) return null;
-  const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|shorts\/))([\w-]{11})/);
-  return match ? match[1] : null;
-};
-
-/* Helper: check if URL is a YouTube link */
-const isYouTubeUrl = (url: string | null): boolean =>
-  !!url && (url.includes('youtube.com') || url.includes('youtu.be'));
-
-/* Helper: get the best preview image for a content item */
-const getPreviewImage = (item: ContentItem): string | null => {
-  if (!item.media_url) return null;
-  if (item.media_type === 'youtube' || isYouTubeUrl(item.media_url)) {
-    const videoId = extractYouTubeId(item.media_url);
-    return videoId ? `https://img.youtube.com/vi/${videoId}/mqdefault.jpg` : null;
-  }
-  return item.media_url;
-};
-
 const Admin = () => {
   const [content, setContent] = useState<ContentItem[]>([]);
   const [inquiries, setInquiries] = useState<Inquiry[]>([]);
@@ -186,32 +165,14 @@ const Admin = () => {
         headers: authHeaders(),
         body: JSON.stringify({
           section: activeSection,
-          title: "",
+          title: "New Item",
           description: "",
           display_order: content.length,
         }),
       });
       if (res.ok) {
-        const data = await res.json();
-        toast({ title: "Added! Fill in the details below." });
-        await fetchContent();
-        // Auto-open the edit form for the newly created item
-        const newId = data.id;
-        if (newId) {
-          setEditingId(newId);
-          setEditForm({
-            id: newId,
-            section: activeSection,
-            title: "",
-            description: "",
-            media_url: null,
-            media_type: 'image',
-            link_url: null,
-            category: null,
-            display_order: content.length,
-            is_active: true,
-          });
-        }
+        toast({ title: "Added!" });
+        fetchContent();
       }
     } catch {
       toast({ title: "Error", description: "Could not add item", variant: "destructive" });
@@ -219,7 +180,6 @@ const Admin = () => {
   };
 
   const handleDelete = async (id: number) => {
-    if (!window.confirm("Are you sure you want to delete this item? This cannot be undone.")) return;
     try {
       const res = await fetch(`${API_URL}/api/content/${id}`, {
         method: "DELETE",
@@ -274,7 +234,6 @@ const Admin = () => {
   };
 
   const handleDeleteInquiry = async (id: number) => {
-    if (!window.confirm("Delete this inquiry? This cannot be undone.")) return;
     try {
       const res = await fetch(`${API_URL}/api/inquiries/${id}`, {
         method: "DELETE",
@@ -518,35 +477,16 @@ const Admin = () => {
                       </div>
                     ) : (
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3 min-w-0">
-                          {(() => {
-                            const preview = getPreviewImage(item);
-                            return preview ? (
-                              <img
-                                src={preview}
-                                alt=""
-                                className="w-16 h-10 object-cover rounded flex-shrink-0"
-                                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                              />
-                            ) : (
-                              <div className="w-16 h-10 rounded bg-secondary flex items-center justify-center flex-shrink-0">
-                                <svg className="w-5 h-5 text-muted-foreground opacity-40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                                  <path d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" />
-                                </svg>
-                              </div>
-                            );
-                          })()}
-                          <div className="min-w-0">
-                            <p className="text-foreground font-medium text-sm font-body truncate">{item.title || <span className="text-muted-foreground italic">Click ✏️ to edit</span>}</p>
-                            <p className="text-muted-foreground text-xs font-body truncate max-w-xs">
-                              {item.description || "No description"}
-                              {isYouTubeUrl(item.media_url) && <span className="ml-1 text-red-400">▶ YouTube</span>}
-                            </p>
+                        <div className="flex items-center gap-3">
+                          {item.media_url && <img src={item.media_url} alt="" className="w-16 h-10 object-cover rounded" />}
+                          <div>
+                            <p className="text-foreground font-medium text-sm font-body">{item.title || "Untitled"}</p>
+                            <p className="text-muted-foreground text-xs font-body truncate max-w-xs">{item.description || "No description"}</p>
                           </div>
-                          {item.category && <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded font-body hidden sm:inline">{item.category}</span>}
+                          {item.category && <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded font-body">{item.category}</span>}
                           {!item.is_active && <span className="text-xs bg-muted px-2 py-0.5 rounded text-muted-foreground font-body">Hidden</span>}
                         </div>
-                        <div className="flex gap-1 flex-shrink-0">
+                        <div className="flex gap-1">
                           <button onClick={() => handleEdit(item)} className="p-2 text-muted-foreground hover:text-foreground transition-colors">
                             <Edit className="w-4 h-4" />
                           </button>
