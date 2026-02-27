@@ -62,7 +62,12 @@
     @apply bg-background text-foreground font-body antialiased;
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     @apply font-display;
   }
 }
@@ -94,12 +99,10 @@
   }
 
   .hero-overlay {
-    background: linear-gradient(
-      to bottom,
-      hsl(20, 10%, 3%, 0.4) 0%,
-      hsl(20, 10%, 3%, 0.7) 50%,
-      hsl(20, 10%, 3%, 0.95) 100%
-    );
+    background: linear-gradient(to bottom,
+        hsl(20, 10%, 3%, 0.4) 0%,
+        hsl(20, 10%, 3%, 0.7) 50%,
+        hsl(20, 10%, 3%, 0.95) 100%);
   }
 
   .section-divider {
@@ -120,13 +123,13 @@
   background: hsl(20, 10%, 8%);
   cursor: pointer;
   transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94),
-              box-shadow 0.4s ease;
+    box-shadow 0.4s ease;
 }
 
 .gallery-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 12px 40px -8px hsl(43, 80%, 55%, 0.2),
-              0 4px 16px rgba(0,0,0,0.3);
+    0 4px 16px rgba(0, 0, 0, 0.3);
 }
 
 .gallery-card img {
@@ -134,7 +137,7 @@
   height: 100%;
   object-fit: cover;
   transition: transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94),
-              filter 0.5s ease;
+    filter 0.5s ease;
 }
 
 .gallery-card:hover img {
@@ -150,12 +153,10 @@
   flex-direction: column;
   justify-content: flex-end;
   padding: 1.25rem;
-  background: linear-gradient(
-    to top,
-    hsla(20, 10%, 3%, 0.9) 0%,
-    hsla(20, 10%, 3%, 0.4) 50%,
-    transparent 100%
-  );
+  background: linear-gradient(to top,
+      hsla(20, 10%, 3%, 0.9) 0%,
+      hsla(20, 10%, 3%, 0.4) 50%,
+      transparent 100%);
   opacity: 0;
   transition: opacity 0.4s ease;
 }
@@ -270,6 +271,7 @@
     grid-column: span 2;
     grid-row: span 2;
   }
+
   .gallery-masonry .gallery-card:nth-child(5n+1) {
     grid-row: span 1;
   }
@@ -287,8 +289,54 @@
 
 .film-card:hover {
   border-color: hsl(43, 80%, 55%, 0.3);
-  box-shadow: 0 8px 32px -4px rgba(0,0,0,0.4),
-              0 0 24px hsl(43, 80%, 55%, 0.08);
+  box-shadow: 0 8px 32px -4px rgba(0, 0, 0, 0.4),
+    0 0 24px hsl(43, 80%, 55%, 0.08);
+}
+
+/* Film card stacks vertically on mobile */
+@media (max-width: 767px) {
+  .film-card .grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Error/missing video placeholder */
+.film-error-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 16/9;
+  background: linear-gradient(135deg, hsl(20, 10%, 6%), hsl(20, 10%, 10%));
+  border: 1px dashed hsl(30, 10%, 22%);
+  border-radius: 6px;
+  color: hsl(30, 10%, 40%);
+  gap: 12px;
+  padding: 2rem;
+  text-align: center;
+}
+
+.film-error-card svg {
+  width: 48px;
+  height: 48px;
+  opacity: 0.4;
+}
+
+.film-error-card p {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.85rem;
+}
+
+/* Skeleton for video aspect ratio */
+.skeleton-video {
+  aspect-ratio: 16 / 9;
+  background: linear-gradient(90deg,
+      hsl(20, 10%, 8%) 25%,
+      hsl(20, 10%, 12%) 50%,
+      hsl(20, 10%, 8%) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: 6px;
 }
 
 /* Category badge */
@@ -316,17 +364,20 @@
 
 /* Shimmer loading skeleton */
 @keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
 }
 
 .skeleton {
-  background: linear-gradient(
-    90deg,
-    hsl(20, 10%, 10%) 25%,
-    hsl(20, 10%, 15%) 50%,
-    hsl(20, 10%, 10%) 75%
-  );
+  background: linear-gradient(90deg,
+      hsl(20, 10%, 10%) 25%,
+      hsl(20, 10%, 15%) 50%,
+      hsl(20, 10%, 10%) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s ease-in-out infinite;
   border-radius: 4px;
@@ -338,6 +389,7 @@
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -349,23 +401,58 @@
 }
 
 /* Stagger children animation */
-.stagger-children > * {
+.stagger-children>* {
   opacity: 0;
   animation: fadeInUp 0.5s ease-out forwards;
 }
 
-.stagger-children > *:nth-child(1) { animation-delay: 0.05s; }
-.stagger-children > *:nth-child(2) { animation-delay: 0.1s; }
-.stagger-children > *:nth-child(3) { animation-delay: 0.15s; }
-.stagger-children > *:nth-child(4) { animation-delay: 0.2s; }
-.stagger-children > *:nth-child(5) { animation-delay: 0.25s; }
-.stagger-children > *:nth-child(6) { animation-delay: 0.3s; }
-.stagger-children > *:nth-child(7) { animation-delay: 0.35s; }
-.stagger-children > *:nth-child(8) { animation-delay: 0.4s; }
-.stagger-children > *:nth-child(9) { animation-delay: 0.45s; }
-.stagger-children > *:nth-child(10) { animation-delay: 0.5s; }
-.stagger-children > *:nth-child(11) { animation-delay: 0.55s; }
-.stagger-children > *:nth-child(12) { animation-delay: 0.6s; }
+.stagger-children>*:nth-child(1) {
+  animation-delay: 0.05s;
+}
+
+.stagger-children>*:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.stagger-children>*:nth-child(3) {
+  animation-delay: 0.15s;
+}
+
+.stagger-children>*:nth-child(4) {
+  animation-delay: 0.2s;
+}
+
+.stagger-children>*:nth-child(5) {
+  animation-delay: 0.25s;
+}
+
+.stagger-children>*:nth-child(6) {
+  animation-delay: 0.3s;
+}
+
+.stagger-children>*:nth-child(7) {
+  animation-delay: 0.35s;
+}
+
+.stagger-children>*:nth-child(8) {
+  animation-delay: 0.4s;
+}
+
+.stagger-children>*:nth-child(9) {
+  animation-delay: 0.45s;
+}
+
+.stagger-children>*:nth-child(10) {
+  animation-delay: 0.5s;
+}
+
+.stagger-children>*:nth-child(11) {
+  animation-delay: 0.55s;
+}
+
+.stagger-children>*:nth-child(12) {
+  animation-delay: 0.6s;
+}
 
 /* Premium YouTube embed container */
 .yt-embed-wrapper {
@@ -373,14 +460,14 @@
   border-radius: 6px;
   overflow: hidden;
   border: 1px solid hsl(30, 10%, 18%);
-  box-shadow: 0 8px 32px -4px rgba(0,0,0,0.5);
+  box-shadow: 0 8px 32px -4px rgba(0, 0, 0, 0.5);
   transition: box-shadow 0.3s ease, border-color 0.3s ease;
 }
 
 .yt-embed-wrapper:hover {
   border-color: hsl(43, 80%, 55%, 0.2);
-  box-shadow: 0 16px 48px -8px rgba(0,0,0,0.6),
-              0 0 32px hsl(43, 80%, 55%, 0.1);
+  box-shadow: 0 16px 48px -8px rgba(0, 0, 0, 0.6),
+    0 0 32px hsl(43, 80%, 55%, 0.1);
 }
 
 /* Glowing accent line */
