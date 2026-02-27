@@ -46,7 +46,7 @@ const defaultWeddingPhotos = [
 const getYouTubeThumbnail = (url: string) => {
     // Extract video ID from various YouTube URL formats
     let videoId = url;
-    const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|shorts\/))([\\w-]{11})/);
+    const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|shorts\/))([\w-]{11})/);
     if (match) videoId = match[1];
     // If it's already just an ID (11 chars)
     if (/^[\w-]{11}$/.test(videoId)) return `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
@@ -57,7 +57,7 @@ const isYouTubeUrl = (url: string | null) =>
     !!url && (url.includes('youtube.com') || url.includes('youtu.be'));
 
 const getVideoId = (url: string): string | null => {
-    const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|shorts\/))([\\w-]{11})/);
+    const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|shorts\/))([\w-]{11})/);
     return match ? match[1] : (/^[\w-]{11}$/.test(url) ? url : null);
 };
 
@@ -86,7 +86,7 @@ const mapFilms = (items: ContentItem[]) =>
     items.map((i) => {
         // Extract video ID from full YouTube URLs
         let videoId = i.media_url || "dQw4w9WgXcQ";
-        const match = videoId.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|shorts\/))([\\w-]{11})/);
+        const match = videoId.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|shorts\/))([\w-]{11})/);
         if (match) videoId = match[1];
         return {
             title: i.title || "Untitled Film",
