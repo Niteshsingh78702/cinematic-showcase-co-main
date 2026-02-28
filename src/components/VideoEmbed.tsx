@@ -9,6 +9,9 @@ export const isGoogleDriveUrl = (url: string | null): boolean =>
 export const isYouTubeUrl = (url: string | null): boolean =>
     !!url && (url.includes("youtube.com") || url.includes("youtu.be"));
 
+export const isLocalVideoUrl = (url: string | null): boolean =>
+    !!url && (url.match(/\.(mp4|webm|ogg|mov)$/i) !== null || (url.includes("/uploads/") && !isYouTubeUrl(url) && !isGoogleDriveUrl(url)));
+
 /** Extract Google Drive file ID from various URL formats */
 export const extractGDriveFileId = (url: string): string => {
     // Format: https://drive.google.com/file/d/{FILE_ID}/view
@@ -45,11 +48,13 @@ export const extractYouTubeVideoId = (url: string): string => {
 export const detectVideoType = (
     url: string | null,
     mediaType?: string | null
-): "youtube" | "gdrive" | "unknown" => {
+): "youtube" | "gdrive" | "local" | "unknown" => {
     if (mediaType === "gdrive") return "gdrive";
     if (mediaType === "youtube") return "youtube";
+    if (mediaType === "video" || mediaType === "local") return "local";
     if (isGoogleDriveUrl(url)) return "gdrive";
     if (isYouTubeUrl(url)) return "youtube";
+    if (isLocalVideoUrl(url)) return "local";
     // Bare 11-char string is likely a YouTube video ID
     if (url && /^[\w-]{11}$/.test(url)) return "youtube";
     return "unknown";
@@ -70,6 +75,7 @@ interface VideoEmbedProps {
  * Auto-detects the video source and renders the appropriate embed.
  * - YouTube → delegates to YouTubeEmbed (untouched)
  * - Google Drive → delegates to GoogleDriveEmbed
+ * - Local/uploaded → renders HTML5 video player
  * - Unknown → falls back to YouTubeEmbed (backward compatible)
  */
 const VideoEmbed = ({ url, title = "Video", className = "", mediaType }: VideoEmbedProps) => {
@@ -78,6 +84,26 @@ const VideoEmbed = ({ url, title = "Video", className = "", mediaType }: VideoEm
     if (type === "gdrive") {
         const fileId = extractGDriveFileId(url);
         return <GoogleDriveEmbed fileId={fileId} title={title} className={className} />;
+    }
+
+    if (type === "local") {
+        // Resolve the video URL — prepend API base if it's a relative path
+        const videoSrc = url.startsWith("http") ? url : `${import.meta.env.VITE_API_URL || ""}${url}`;
+        return (
+            <div className={`relative w-full ${className}`} style={{ aspectRatio: "16/9" }}>
+                <video
+                    src={videoSrc}
+                    title={title}
+                    controls
+                    playsInline
+                    preload="metadata"
+                    className="w-full h-full rounded-sm bg-black"
+                    style={{ objectFit: "contain" }}
+                >
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+        );
     }
 
     // YouTube or unknown — extract video ID and use existing component

@@ -3,7 +3,7 @@ import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import VideoEmbed from "@/components/VideoEmbed";
-import { isGoogleDriveUrl } from "@/components/VideoEmbed";
+import { isGoogleDriveUrl, isLocalVideoUrl } from "@/components/VideoEmbed";
 import ImageLightbox from "@/components/ImageLightbox";
 import { useContent, ContentItem } from "@/hooks/useContent";
 import actressPortrait from "@/assets/actress-portrait.jpg";
@@ -69,8 +69,9 @@ const Actress = () => {
     const showreelItems = showreelContent.filter(
         (i) => i.media_url && (
             i.media_type === "youtube" || i.media_type === "gdrive" ||
+            i.media_type === "video" || i.media_type === "local" ||
             i.media_url.includes("youtube") || i.media_url.includes("youtu.be") ||
-            isGoogleDriveUrl(i.media_url)
+            isGoogleDriveUrl(i.media_url) || isLocalVideoUrl(i.media_url)
         )
     );
     const showreelVideoId = showreelItems.length > 0
