@@ -2,7 +2,8 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import YouTubeEmbed from "@/components/YouTubeEmbed";
+import VideoEmbed from "@/components/VideoEmbed";
+import { isGoogleDriveUrl } from "@/components/VideoEmbed";
 import ImageLightbox from "@/components/ImageLightbox";
 import { useContent, ContentItem } from "@/hooks/useContent";
 import actressPortrait from "@/assets/actress-portrait.jpg";
@@ -66,7 +67,11 @@ const Actress = () => {
 
     /* Find showreel videos (youtube type) from actress_showreel section */
     const showreelItems = showreelContent.filter(
-        (i) => i.media_url && (i.media_type === "youtube" || i.media_url.includes("youtube") || i.media_url.includes("youtu.be"))
+        (i) => i.media_url && (
+            i.media_type === "youtube" || i.media_type === "gdrive" ||
+            i.media_url.includes("youtube") || i.media_url.includes("youtu.be") ||
+            isGoogleDriveUrl(i.media_url)
+        )
     );
     const showreelVideoId = showreelItems.length > 0
         ? extractVideoId(showreelItems[0].media_url!)
@@ -208,7 +213,7 @@ const Actress = () => {
                                     className="yt-embed-wrapper"
                                 >
                                     {item.title && <p className="text-foreground font-body text-sm mb-2">{item.title}</p>}
-                                    <YouTubeEmbed videoId={extractVideoId(item.media_url!)} title={item.title || "Showreel"} />
+                                    <VideoEmbed url={item.media_url!} title={item.title || "Showreel"} mediaType={item.media_type} />
                                 </motion.div>
                             ))}
                         </div>
@@ -221,7 +226,7 @@ const Actress = () => {
                             variants={fadeInUp}
                             className="max-w-4xl mx-auto yt-embed-wrapper"
                         >
-                            <YouTubeEmbed videoId={showreelVideoId} title="Monika Singh — Showreel" />
+                            <VideoEmbed url={showreelItems.length > 0 ? showreelItems[0].media_url! : "dQw4w9WgXcQ"} title="Monika Singh — Showreel" />
                         </motion.div>
                     )}
                 </div>

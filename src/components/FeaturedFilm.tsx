@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import YouTubeEmbed from "./YouTubeEmbed";
+import VideoEmbed from "./VideoEmbed";
 import { useContent } from "@/hooks/useContent";
 
 const fadeInUp = {
@@ -76,7 +76,7 @@ const FeaturedFilm = () => {
                         variants={fadeInUp}
                         className="yt-embed-wrapper"
                     >
-                        <YouTubeEmbed videoId={videoId} title={`${title} — Official Trailer`} />
+                        <VideoEmbed url={featured?.media_url || "dQw4w9WgXcQ"} title={`${title} — Official Trailer`} mediaType={featured?.media_type} />
                     </motion.div>
 
                     {/* Details */}

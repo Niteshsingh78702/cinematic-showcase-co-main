@@ -2,7 +2,8 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import YouTubeEmbed from "@/components/YouTubeEmbed";
+import VideoEmbed from "@/components/VideoEmbed";
+import { isGoogleDriveUrl, extractGDriveFileId, isYouTubeUrl as isYTUrl } from "@/components/VideoEmbed";
 import ImageLightbox from "@/components/ImageLightbox";
 import { useMultiContent, ContentItem } from "@/hooks/useContent";
 
@@ -20,26 +21,26 @@ const fadeInUp = {
 
 /* ---------- default (fallback) data ---------- */
 const defaultAlbums = [
-    { title: "Mon Bhore Jai", category: "Purulia Bangla", image: albumCover, year: "2024", link: "", mediaType: "image" },
-    { title: "Khortha Melodies", category: "Khortha", image: filmCover, year: "2023", link: "", mediaType: "image" },
-    { title: "Santhali Serenade", category: "Santhali", image: weddingCover, year: "2023", link: "", mediaType: "image" },
-    { title: "Dil Ka Dard", category: "Purulia Bangla", image: heroBg, year: "2024", link: "", mediaType: "image" },
-    { title: "Prem Kahani", category: "Khortha", image: actressPortrait, year: "2023", link: "", mediaType: "image" },
-    { title: "Jharkhand Ki Rani", category: "Santhali", image: albumCover, year: "2022", link: "", mediaType: "image" },
+    { title: "Mon Bhore Jai", category: "Purulia Bangla", image: albumCover, year: "2024", link: "", mediaType: "image", videoId: null as string | null, fullUrl: "" },
+    { title: "Khortha Melodies", category: "Khortha", image: filmCover, year: "2023", link: "", mediaType: "image", videoId: null as string | null, fullUrl: "" },
+    { title: "Santhali Serenade", category: "Santhali", image: weddingCover, year: "2023", link: "", mediaType: "image", videoId: null as string | null, fullUrl: "" },
+    { title: "Dil Ka Dard", category: "Purulia Bangla", image: heroBg, year: "2024", link: "", mediaType: "image", videoId: null as string | null, fullUrl: "" },
+    { title: "Prem Kahani", category: "Khortha", image: actressPortrait, year: "2023", link: "", mediaType: "image", videoId: null as string | null, fullUrl: "" },
+    { title: "Jharkhand Ki Rani", category: "Santhali", image: albumCover, year: "2022", link: "", mediaType: "image", videoId: null as string | null, fullUrl: "" },
 ];
 
 const defaultFilms = [
-    { title: "Milloner Bela", videoId: "dQw4w9WgXcQ", year: "2024", genre: "Drama • Picture Film" },
-    { title: "Purulia Express", videoId: "dQw4w9WgXcQ", year: "2023", genre: "Adventure • Short Film" },
+    { title: "Milloner Bela", videoId: "dQw4w9WgXcQ", year: "2024", genre: "Drama • Picture Film", description: "", fullUrl: "dQw4w9WgXcQ", mediaType: "youtube" },
+    { title: "Purulia Express", videoId: "dQw4w9WgXcQ", year: "2023", genre: "Adventure • Short Film", description: "", fullUrl: "dQw4w9WgXcQ", mediaType: "youtube" },
 ];
 
 const defaultWeddingPhotos = [
-    { src: heroBg, alt: "Grand Reception Setup", mediaType: "image" as const, videoId: null as string | null, link: "" },
-    { src: albumCover, alt: "Bridal Portrait", mediaType: "image" as const, videoId: null as string | null, link: "" },
-    { src: filmCover, alt: "Ceremony Moments", mediaType: "image" as const, videoId: null as string | null, link: "" },
-    { src: weddingCover, alt: "Sangeet Night", mediaType: "image" as const, videoId: null as string | null, link: "" },
-    { src: actressPortrait, alt: "Couple Portrait", mediaType: "image" as const, videoId: null as string | null, link: "" },
-    { src: heroBg, alt: "Mandap Decoration", mediaType: "image" as const, videoId: null as string | null, link: "" },
+    { src: heroBg, alt: "Grand Reception Setup", mediaType: "image" as const, videoId: null as string | null, link: "", fullUrl: "" },
+    { src: albumCover, alt: "Bridal Portrait", mediaType: "image" as const, videoId: null as string | null, link: "", fullUrl: "" },
+    { src: filmCover, alt: "Ceremony Moments", mediaType: "image" as const, videoId: null as string | null, link: "", fullUrl: "" },
+    { src: weddingCover, alt: "Sangeet Night", mediaType: "image" as const, videoId: null as string | null, link: "", fullUrl: "" },
+    { src: actressPortrait, alt: "Couple Portrait", mediaType: "image" as const, videoId: null as string | null, link: "", fullUrl: "" },
+    { src: heroBg, alt: "Mandap Decoration", mediaType: "image" as const, videoId: null as string | null, link: "", fullUrl: "" },
 ];
 
 /* ---------- helpers — map API data to display ---------- */
@@ -56,6 +57,8 @@ const getYouTubeThumbnail = (url: string) => {
 const isYouTubeUrl = (url: string | null) =>
     !!url && (url.includes('youtube.com') || url.includes('youtu.be'));
 
+const isGDriveUrl = (url: string | null) => isGoogleDriveUrl(url);
+
 const getVideoId = (url: string): string | null => {
     const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|shorts\/))([\w-]{11})/);
     return match ? match[1] : (/^[\w-]{11}$/.test(url) ? url : null);
@@ -64,21 +67,25 @@ const getVideoId = (url: string): string | null => {
 const mapAlbums = (items: ContentItem[]) =>
     items.map((i) => {
         const ytDetected = i.media_type === 'youtube' || isYouTubeUrl(i.media_url);
+        const gdriveDetected = i.media_type === 'gdrive' || isGDriveUrl(i.media_url);
         const videoId = ytDetected && i.media_url ? getVideoId(i.media_url) : null;
         return {
             title: i.title || "Untitled Album",
             category: i.category || "Purulia Bangla",
             image: ytDetected && i.media_url
                 ? getYouTubeThumbnail(i.media_url) || albumCover
-                : i.media_url || albumCover,
+                : gdriveDetected && i.media_url
+                    ? `https://drive.google.com/thumbnail?id=${extractGDriveFileId(i.media_url)}&sz=w640`
+                    : i.media_url || albumCover,
             year: i.description || "2024",
             link: i.link_url || (ytDetected && i.media_url
                 ? (i.media_url.includes('youtube.com') || i.media_url.includes('youtu.be')
                     ? i.media_url
                     : `https://www.youtube.com/watch?v=${i.media_url}`)
                 : ""),
-            mediaType: ytDetected ? 'youtube' : (i.media_type || 'image'),
+            mediaType: gdriveDetected ? 'gdrive' : (ytDetected ? 'youtube' : (i.media_type || 'image')),
             videoId,
+            fullUrl: i.media_url || "",
         };
     });
 
@@ -88,26 +95,33 @@ const mapFilms = (items: ContentItem[]) =>
         let videoId = i.media_url || "dQw4w9WgXcQ";
         const match = videoId.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|shorts\/))([\w-]{11})/);
         if (match) videoId = match[1];
+        const gdriveDetected = i.media_type === 'gdrive' || isGDriveUrl(i.media_url);
         return {
             title: i.title || "Untitled Film",
             videoId,
             year: i.link_url || "2024",
             genre: i.category || "Drama • Short Film",
             description: i.description || "",
+            fullUrl: i.media_url || "dQw4w9WgXcQ",
+            mediaType: gdriveDetected ? 'gdrive' : (i.media_type || 'youtube'),
         };
     });
 
 const mapWeddings = (items: ContentItem[]) =>
     items.map((i) => {
         const ytDetected = i.media_type === 'youtube' || isYouTubeUrl(i.media_url);
+        const gdriveDetected = i.media_type === 'gdrive' || isGDriveUrl(i.media_url);
         const videoId = ytDetected && i.media_url ? getVideoId(i.media_url) : null;
         return {
             src: ytDetected && i.media_url
                 ? getYouTubeThumbnail(i.media_url) || weddingCover
-                : i.media_url || weddingCover,
+                : gdriveDetected && i.media_url
+                    ? `https://drive.google.com/thumbnail?id=${extractGDriveFileId(i.media_url)}&sz=w640`
+                    : i.media_url || weddingCover,
             alt: i.title || "Wedding Moment",
-            mediaType: ytDetected ? 'youtube' : 'image',
+            mediaType: gdriveDetected ? 'gdrive' : (ytDetected ? 'youtube' : 'image'),
             videoId,
+            fullUrl: i.media_url || "",
             link: i.link_url || (ytDetected && i.media_url
                 ? (i.media_url.includes('youtube.com') || i.media_url.includes('youtu.be')
                     ? i.media_url
@@ -128,7 +142,7 @@ const Work = () => {
     const [activeCat, setActiveCat] = useState("All");
     const [lightboxOpen, setLightboxOpen] = useState(false);
     const [lightboxIndex, setLightboxIndex] = useState(0);
-    const [ytModal, setYtModal] = useState<{ videoId: string; title: string; link: string } | null>(null);
+    const [ytModal, setYtModal] = useState<{ videoId: string; title: string; link: string; mediaType?: string; fullUrl?: string } | null>(null);
 
     /* Fetch all three sections */
     const { data, loading } = useMultiContent(["work_albums", "work_films", "work_weddings"]);
@@ -216,9 +230,11 @@ const Work = () => {
                                     exit={{ opacity: 0, scale: 0.9 }}
                                     transition={{ duration: 0.35 }}
                                     className="gallery-card aspect-video"
-                                    style={{ cursor: album.mediaType === 'youtube' || album.link ? 'pointer' : 'default' }}
+                                    style={{ cursor: album.mediaType === 'youtube' || album.mediaType === 'gdrive' || album.link ? 'pointer' : 'default' }}
                                     onClick={() => {
-                                        if (album.mediaType === 'youtube' && album.videoId) {
+                                        if (album.mediaType === 'gdrive' && album.fullUrl) {
+                                            setYtModal({ videoId: '', title: album.title, link: '', mediaType: 'gdrive', fullUrl: album.fullUrl });
+                                        } else if (album.mediaType === 'youtube' && album.videoId) {
                                             setYtModal({ videoId: album.videoId, title: album.title, link: album.link });
                                         } else if (album.link) {
                                             window.open(album.link, '_blank');
@@ -226,7 +242,7 @@ const Work = () => {
                                     }}
                                 >
                                     <img src={album.image} alt={album.title} loading="lazy" />
-                                    {album.mediaType === 'youtube' && (
+                                    {(album.mediaType === 'youtube' || album.mediaType === 'gdrive') && (
                                         <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 5, pointerEvents: 'none' }}>
                                             <svg width="56" height="56" viewBox="0 0 24 24" fill="none">
                                                 <circle cx="12" cy="12" r="12" fill="rgba(0,0,0,0.6)" />
@@ -266,7 +282,7 @@ const Work = () => {
                                 >
                                     <div className="grid md:grid-cols-[1.6fr_1fr] gap-0">
                                         <div className="yt-embed-wrapper border-0 rounded-none shadow-none">
-                                            <YouTubeEmbed videoId={film.videoId} title={film.title} />
+                                            <VideoEmbed url={film.fullUrl} title={film.title} mediaType={film.mediaType} />
                                         </div>
                                         <div className="p-6 md:p-8 flex flex-col justify-center">
                                             <span className="text-primary text-xs tracking-[0.2em] uppercase font-body mb-2">{film.genre}</span>
@@ -309,9 +325,11 @@ const Work = () => {
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ duration: 0.4, delay: i * 0.06 }}
                                     className="gallery-card"
-                                    style={{ minHeight: i % 7 === 0 ? "320px" : "220px", cursor: photo.mediaType === 'youtube' ? 'pointer' : 'pointer' }}
+                                    style={{ minHeight: i % 7 === 0 ? "320px" : "220px", cursor: 'pointer' }}
                                     onClick={() => {
-                                        if (photo.mediaType === 'youtube' && photo.videoId) {
+                                        if (photo.mediaType === 'gdrive' && photo.fullUrl) {
+                                            setYtModal({ videoId: '', title: photo.alt, link: '', mediaType: 'gdrive', fullUrl: photo.fullUrl });
+                                        } else if (photo.mediaType === 'youtube' && photo.videoId) {
                                             setYtModal({ videoId: photo.videoId, title: photo.alt, link: photo.link || '' });
                                         } else {
                                             setLightboxIndex(i); setLightboxOpen(true);
@@ -319,7 +337,7 @@ const Work = () => {
                                     }}
                                 >
                                     <img src={photo.src} alt={photo.alt} loading="lazy" />
-                                    {photo.mediaType === 'youtube' && (
+                                    {(photo.mediaType === 'youtube' || photo.mediaType === 'gdrive') && (
                                         <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 5, pointerEvents: 'none' }}>
                                             <svg width="56" height="56" viewBox="0 0 24 24" fill="none">
                                                 <circle cx="12" cy="12" r="12" fill="rgba(0,0,0,0.6)" />
@@ -329,7 +347,7 @@ const Work = () => {
                                     )}
                                     <div className="card-overlay">
                                         <h3>{photo.alt}</h3>
-                                        <p>{photo.mediaType === 'youtube' ? '▶ Watch Video' : 'Wedding Collection'}</p>
+                                        <p>{(photo.mediaType === 'youtube' || photo.mediaType === 'gdrive') ? '▶ Watch Video' : 'Wedding Collection'}</p>
                                     </div>
                                 </motion.div>
                             ))}
@@ -364,15 +382,25 @@ const Work = () => {
                             Close
                         </button>
 
-                        {/* Embedded YouTube player */}
+                        {/* Embedded video player */}
                         <div className="aspect-video bg-black rounded-lg overflow-hidden shadow-2xl">
-                            <iframe
-                                src={`https://www.youtube.com/embed/${ytModal.videoId}?autoplay=1&rel=0&modestbranding=1`}
-                                title={ytModal.title}
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                allowFullScreen
-                                className="w-full h-full border-0"
-                            />
+                            {ytModal.mediaType === 'gdrive' && ytModal.fullUrl ? (
+                                <iframe
+                                    src={`https://drive.google.com/file/d/${extractGDriveFileId(ytModal.fullUrl)}/preview`}
+                                    title={ytModal.title}
+                                    allow="autoplay; encrypted-media"
+                                    allowFullScreen
+                                    className="w-full h-full border-0"
+                                />
+                            ) : (
+                                <iframe
+                                    src={`https://www.youtube.com/embed/${ytModal.videoId}?autoplay=1&rel=0&modestbranding=1`}
+                                    title={ytModal.title}
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowFullScreen
+                                    className="w-full h-full border-0"
+                                />
+                            )}
                         </div>
 
                         {/* Title + YouTube link */}
@@ -385,7 +413,7 @@ const Work = () => {
                                     rel="noopener noreferrer"
                                     className="text-primary text-sm font-body hover:underline flex items-center gap-1"
                                 >
-                                    Watch on YouTube
+                                    {ytModal.mediaType === 'gdrive' ? 'Open in Google Drive' : 'Watch on YouTube'}
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg>
                                 </a>
                             )}
