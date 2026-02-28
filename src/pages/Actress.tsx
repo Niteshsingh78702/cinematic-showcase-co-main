@@ -58,11 +58,15 @@ const Actress = () => {
         return url;
     };
 
+    /* Resolve relative upload paths against the API base */
+    const resolveMediaUrl = (url: string): string =>
+        url.startsWith("http") ? url : `${import.meta.env.VITE_API_URL || ""}${url}`;
+
     /* Map API items to photos — use uploaded images when available */
     const photos = galleryContent.length > 0
         ? galleryContent
             .filter((i) => i.media_url)
-            .map((i) => ({ src: i.media_url!, alt: i.title || "Monika Singh" }))
+            .map((i) => ({ src: resolveMediaUrl(i.media_url!), alt: i.title || "Monika Singh" }))
         : defaultPhotos;
 
     /* Find showreel videos (youtube type) from actress_showreel section */
