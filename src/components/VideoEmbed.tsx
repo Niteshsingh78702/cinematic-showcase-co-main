@@ -49,11 +49,14 @@ export const detectVideoType = (
     url: string | null,
     mediaType?: string | null
 ): "youtube" | "gdrive" | "local" | "unknown" => {
+    // Explicit media_type hints (specific types)
     if (mediaType === "gdrive") return "gdrive";
     if (mediaType === "youtube") return "youtube";
-    if (mediaType === "video" || mediaType === "local") return "local";
+    // URL-based detection takes priority over generic "video" type
     if (isGoogleDriveUrl(url)) return "gdrive";
     if (isYouTubeUrl(url)) return "youtube";
+    // Generic "video" media_type → local file
+    if (mediaType === "video" || mediaType === "local") return "local";
     if (isLocalVideoUrl(url)) return "local";
     // Bare 11-char string is likely a YouTube video ID
     if (url && /^[\w-]{11}$/.test(url)) return "youtube";
