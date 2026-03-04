@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import VideoEmbed from "@/components/VideoEmbed";
@@ -241,7 +241,13 @@ const Work = () => {
                                         }
                                     }}
                                 >
-                                    <img src={album.image} alt={album.title} loading="lazy" />
+                                    <img
+                                        src={album.image}
+                                        alt={album.title}
+                                        loading="lazy"
+                                        crossOrigin="anonymous"
+                                        onError={(e) => { (e.target as HTMLImageElement).src = albumCover; }}
+                                    />
                                     {(album.mediaType === 'youtube' || album.mediaType === 'gdrive') && (
                                         <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 5, pointerEvents: 'none' }}>
                                             <svg width="56" height="56" viewBox="0 0 24 24" fill="none">
@@ -336,7 +342,13 @@ const Work = () => {
                                         }
                                     }}
                                 >
-                                    <img src={photo.src} alt={photo.alt} loading="lazy" />
+                                    <img
+                                        src={photo.src}
+                                        alt={photo.alt}
+                                        loading="lazy"
+                                        crossOrigin="anonymous"
+                                        onError={(e) => { (e.target as HTMLImageElement).src = weddingCover; }}
+                                    />
                                     {(photo.mediaType === 'youtube' || photo.mediaType === 'gdrive') && (
                                         <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 5, pointerEvents: 'none' }}>
                                             <svg width="56" height="56" viewBox="0 0 24 24" fill="none">
