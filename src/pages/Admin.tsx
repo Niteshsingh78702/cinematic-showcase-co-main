@@ -40,6 +40,7 @@ type SeoSetting = {
 const SECTIONS = [
   { key: "work_albums", label: "\uD83C\uDFB5 Albums", type: "content" },
   { key: "work_films", label: "\uD83C\uDFAC Films", type: "content" },
+  { key: "work_trailers", label: "\uD83C\uDFAC Trailers", type: "content" },
   { key: "work_weddings", label: "\uD83D\uDC8D Weddings", type: "content" },
   { key: "services", label: "\uD83C\uDFA5 Services", type: "content" },
   { key: "hero", label: "\uD83C\uDFE0 Hero", type: "content" },
@@ -51,13 +52,43 @@ const SECTIONS = [
   { key: "seo", label: "\uD83D\uDD0D SEO Settings", type: "seo" },
 ];
 
+/* Helpers for Google Drive detection */
+const isGDriveUrl = (url: string) => url.includes('drive.google.com') || url.includes('docs.google.com');
+const extractGDriveFileId = (url: string): string => {
+  const fileMatch = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+  if (fileMatch) return fileMatch[1];
+  const idMatch = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+  if (idMatch) return idMatch[1];
+  const docsMatch = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+  if (docsMatch) return docsMatch[1];
+  return url;
+};
+
+/* Smart thumbnail resolver for admin list/preview */
+const getAdminThumbnail = (item: ContentItem): string | null => {
+  if (!item.media_url) return null;
+  const isYT = item.media_type === 'youtube' || item.media_url.includes('youtube.com') || item.media_url.includes('youtu.be');
+  const isGD = item.media_type === 'gdrive' || isGDriveUrl(item.media_url);
+  if (isYT) {
+    const match = item.media_url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|shorts\/))([\w-]{11})/);
+    const vid = match ? match[1] : (/^[\w-]{11}$/.test(item.media_url) ? item.media_url : null);
+    return vid ? `https://img.youtube.com/vi/${vid}/mqdefault.jpg` : null;
+  }
+  if (isGD) {
+    const fid = extractGDriveFileId(item.media_url);
+    return `https://drive.google.com/thumbnail?id=${fid}&sz=w320`;
+  }
+  return item.media_url;
+};
+
 const SECTION_HINTS: Record<string, string> = {
-  featured_film: "This controls the Featured Release video on the homepage. Add ONE item with a YouTube URL.",
-  actress_showreel: "Add YouTube video URLs here for the Actress page showreel section.",
+  featured_film: "This controls the Featured Release video on the homepage. Add ONE item with a YouTube or Google Drive URL.",
+  actress_showreel: "Add YouTube or Google Drive video URLs here for the Actress page showreel section.",
   actress_gallery: "Upload photos here for the Actress page gallery.",
-  work_albums: "Add music album entries with YouTube URLs or images.",
-  work_films: "Add film entries with YouTube URLs.",
-  work_weddings: "Add wedding entries with images or YouTube links.",
+  work_albums: "Add music album entries with YouTube/Google Drive URLs or images.",
+  work_films: "Add film entries with YouTube or Google Drive URLs.",
+  work_trailers: "Add short film trailers with YouTube or Google Drive URLs. These appear in the Trailers tab on the Work page.",
+  work_weddings: "Add wedding entries with images, YouTube or Google Drive links.",
   hero: "Manage the homepage hero/banner section.",
   about: "Manage the About page content.",
   services: "Manage the services listed on the Services page.",
@@ -363,12 +394,17 @@ const Admin = () => {
                         />
                         <div className="flex gap-2 items-end">
                           <input
-                            placeholder="Media URL (or upload below)"
+                            placeholder="Media URL (YouTube, Google Drive, or upload below)"
                             value={editForm.media_url || ""}
                             onChange={(e) => {
                               const url = e.target.value;
                               const isYT = url.includes('youtube.com') || url.includes('youtu.be');
-                              setEditForm((p) => ({ ...p, media_url: url, ...(isYT ? { media_type: 'youtube' } : {}) }));
+                              const isGD = isGDriveUrl(url);
+                              setEditForm((p) => ({
+                                ...p,
+                                media_url: url,
+                                ...(isYT ? { media_type: 'youtube' } : isGD ? { media_type: 'gdrive' } : {}),
+                              }));
                             }}
                             className="flex-1 bg-secondary border border-border rounded-sm px-3 py-2 text-foreground font-body text-sm focus:outline-none focus:border-primary/50"
                           />
@@ -377,11 +413,15 @@ const Admin = () => {
                             {uploading ? "Uploading..." : "Upload"}
                             <input
                               type="file"
-                              accept="image/*,video/mp4,video/webm"
+                              accept="image/*,video/mp4,video/webm,video/quicktime,.mov,.mp4,.webm"
                               className="hidden"
                               onChange={async (e) => {
                                 const file = e.target.files?.[0];
                                 if (!file) return;
+                                if (file.size > 100 * 1024 * 1024) {
+                                  toast({ title: 'File too large', description: 'Maximum file size is 100 MB', variant: 'destructive' });
+                                  return;
+                                }
                                 setUploading(true);
                                 try {
                                   const formData = new FormData();
@@ -394,13 +434,20 @@ const Admin = () => {
                                   });
                                   if (res.ok) {
                                     const data = await res.json();
-                                    setEditForm((p) => ({ ...p, media_url: data.url }));
-                                    toast({ title: 'Uploaded!', description: file.name });
+                                    const isVideoFile = file.type.startsWith('video/') || /\.(mp4|webm|mov|ogg)$/i.test(file.name);
+                                    setEditForm((p) => ({
+                                      ...p,
+                                      media_url: data.url,
+                                      ...(isVideoFile ? { media_type: 'video' } : {}),
+                                    }));
+                                    const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
+                                    toast({ title: 'Uploaded!', description: `${file.name} (${sizeMB} MB)` });
                                   } else {
-                                    toast({ title: 'Upload failed', variant: 'destructive' });
+                                    const errData = await res.json().catch(() => ({}));
+                                    toast({ title: 'Upload failed', description: errData.error || 'Server error', variant: 'destructive' });
                                   }
                                 } catch {
-                                  toast({ title: 'Upload error', description: 'Check R2 config', variant: 'destructive' });
+                                  toast({ title: 'Upload error', description: 'Check server/R2 config', variant: 'destructive' });
                                 }
                                 setUploading(false);
                                 e.target.value = '';
@@ -417,6 +464,7 @@ const Admin = () => {
                             <option value="image">Image</option>
                             <option value="video">Video</option>
                             <option value="youtube">YouTube</option>
+                            <option value="gdrive">Google Drive</option>
                           </select>
                           <input
                             placeholder="Category"
@@ -458,11 +506,27 @@ const Admin = () => {
                                   })()}
                                   alt="YouTube Preview"
                                   className="w-32 h-20 object-cover rounded"
+                                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                                 />
                                 <span className="text-xs text-green-400 font-body">✅ YouTube detected</span>
                               </div>
+                            ) : (editForm.media_type === 'gdrive' || isGDriveUrl(editForm.media_url)) ? (
+                              <div className="flex items-center gap-2">
+                                <img
+                                  src={`https://drive.google.com/thumbnail?id=${extractGDriveFileId(editForm.media_url)}&sz=w320`}
+                                  alt="Google Drive Preview"
+                                  className="w-32 h-20 object-cover rounded bg-secondary"
+                                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                                />
+                                <span className="text-xs text-blue-400 font-body">✅ Google Drive detected</span>
+                              </div>
                             ) : (
-                              <img src={editForm.media_url} alt="Preview" className="w-32 h-20 object-cover rounded" />
+                              <img
+                                src={editForm.media_url}
+                                alt="Preview"
+                                className="w-32 h-20 object-cover rounded bg-secondary"
+                                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                              />
                             )}
                           </div>
                         )}
@@ -478,11 +542,31 @@ const Admin = () => {
                     ) : (
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          {item.media_url && <img src={item.media_url} alt="" className="w-16 h-10 object-cover rounded" />}
+                          {item.media_url && (
+                            <img
+                              src={getAdminThumbnail(item) || ''}
+                              alt=""
+                              className="w-16 h-10 object-cover rounded bg-secondary flex-shrink-0"
+                              onError={(e) => {
+                                const el = e.target as HTMLImageElement;
+                                el.style.background = 'linear-gradient(135deg, hsl(20,10%,12%), hsl(20,10%,8%))';
+                                el.style.display = 'block';
+                                el.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 40"><rect width="64" height="40" fill="%23222"/><text x="32" y="24" text-anchor="middle" fill="%23666" font-size="10">🎬</text></svg>';
+                              }}
+                            />
+                          )}
                           <div>
                             <p className="text-foreground font-medium text-sm font-body">{item.title || "Untitled"}</p>
                             <p className="text-muted-foreground text-xs font-body truncate max-w-xs">{item.description || "No description"}</p>
                           </div>
+                          {item.media_type && item.media_type !== 'image' && (
+                            <span className={`text-xs px-2 py-0.5 rounded font-body ${item.media_type === 'youtube' ? 'bg-red-500/10 text-red-400' :
+                              item.media_type === 'gdrive' ? 'bg-blue-500/10 text-blue-400' :
+                                'bg-primary/10 text-primary'
+                              }`}>
+                              {item.media_type === 'youtube' ? '▶ YouTube' : item.media_type === 'gdrive' ? '📁 Drive' : item.media_type}
+                            </span>
+                          )}
                           {item.category && <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded font-body">{item.category}</span>}
                           {!item.is_active && <span className="text-xs bg-muted px-2 py-0.5 rounded text-muted-foreground font-body">Hidden</span>}
                         </div>

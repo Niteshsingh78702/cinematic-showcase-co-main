@@ -46,9 +46,9 @@ if (!fs.existsSync(UPLOADS_DIR)) {
 // Multer — store in memory, upload to R2 or local disk
 const upload = multer({
     storage: multer.memoryStorage(),
-    limits: { fileSize: 15 * 1024 * 1024 }, // 15 MB max
+    limits: { fileSize: 100 * 1024 * 1024 }, // 100 MB max (supports short video/trailer uploads)
     fileFilter: (req, file, cb) => {
-        const allowed = /jpeg|jpg|png|gif|webp|svg|mp4|webm/;
+        const allowed = /jpeg|jpg|png|gif|webp|svg|mp4|webm|mov|quicktime/;
         const ext = path.extname(file.originalname).toLowerCase().replace('.', '');
         const mime = allowed.test(file.mimetype);
         if (mime && allowed.test(ext)) {

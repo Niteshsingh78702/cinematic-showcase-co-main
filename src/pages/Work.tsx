@@ -133,7 +133,8 @@ const mapWeddings = (items: ContentItem[]) =>
 /* ---------- tabs / categories ---------- */
 const tabs = [
     { key: "albums", label: "Music Albums" },
-    { key: "films", label: "Films & Trailers" },
+    { key: "films", label: "Films" },
+    { key: "trailers", label: "Trailers" },
     { key: "weddings", label: "Wedding & Events" },
 ];
 
@@ -144,12 +145,13 @@ const Work = () => {
     const [lightboxIndex, setLightboxIndex] = useState(0);
     const [ytModal, setYtModal] = useState<{ videoId: string; title: string; link: string; mediaType?: string; fullUrl?: string } | null>(null);
 
-    /* Fetch all three sections */
-    const { data, loading } = useMultiContent(["work_albums", "work_films", "work_weddings"]);
+    /* Fetch all four sections */
+    const { data, loading } = useMultiContent(["work_albums", "work_films", "work_trailers", "work_weddings"]);
 
     /* Use API data when available, fallback to defaults when empty */
     const albums = data.work_albums?.length ? mapAlbums(data.work_albums) : defaultAlbums;
     const films = data.work_films?.length ? mapFilms(data.work_films) : defaultFilms;
+    const trailers = data.work_trailers?.length ? mapFilms(data.work_trailers) : [];
     const weddingPhotos = data.work_weddings?.length ? mapWeddings(data.work_weddings) : defaultWeddingPhotos;
 
     /* Derive categories from album data */
@@ -246,7 +248,12 @@ const Work = () => {
                                         alt={album.title}
                                         loading="lazy"
                                         crossOrigin="anonymous"
-                                        onError={(e) => { (e.target as HTMLImageElement).src = albumCover; }}
+                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                        onError={(e) => {
+                                            const el = e.target as HTMLImageElement;
+                                            el.onerror = null;
+                                            el.src = albumCover;
+                                        }}
                                     />
                                     {(album.mediaType === 'youtube' || album.mediaType === 'gdrive') && (
                                         <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 5, pointerEvents: 'none' }}>
@@ -309,6 +316,54 @@ const Work = () => {
                 </section>
             )}
 
+            {/* ==================== TRAILERS TAB ==================== */}
+            {!loading && activeTab === "trailers" && (
+                <section className="py-16 bg-background">
+                    <div className="container mx-auto px-6">
+                        {trailers.length === 0 ? (
+                            <div className="text-center py-20">
+                                <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-secondary flex items-center justify-center">
+                                    <svg className="w-10 h-10 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                                        <path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                    </svg>
+                                </div>
+                                <p className="text-muted-foreground font-body text-lg mb-2">No trailers yet</p>
+                                <p className="text-muted-foreground/60 font-body text-sm">Short film trailers will appear here once added from the admin panel.</p>
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+                                {trailers.map((trailer, i) => (
+                                    <motion.div
+                                        key={trailer.title + i}
+                                        initial="hidden"
+                                        whileInView="visible"
+                                        viewport={{ once: true }}
+                                        transition={{ duration: 0.4, delay: i * 0.1 }}
+                                        variants={fadeInUp}
+                                        className="film-card overflow-hidden"
+                                    >
+                                        <div className="yt-embed-wrapper border-0 rounded-none shadow-none">
+                                            <VideoEmbed url={trailer.fullUrl} title={trailer.title} mediaType={trailer.mediaType} />
+                                        </div>
+                                        <div className="p-4">
+                                            <span className="text-primary text-xs tracking-[0.15em] uppercase font-body mb-1 block">{trailer.genre}</span>
+                                            <h3 className="text-lg font-display font-bold text-foreground mb-1">{trailer.title}</h3>
+                                            {trailer.description && (
+                                                <p className="text-muted-foreground font-body text-xs leading-relaxed mb-2 line-clamp-2">{trailer.description}</p>
+                                            )}
+                                            <div className="flex items-center gap-2 mt-auto">
+                                                <span className="text-xs text-muted-foreground font-body border border-border px-2 py-0.5 rounded-sm">{trailer.year}</span>
+                                                <span className="text-xs text-muted-foreground font-body">MG Films</span>
+                                            </div>
+                                        </div>
+                                    </motion.div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </section>
+            )}
+
             {/* ==================== WEDDINGS TAB ==================== */}
             {!loading && activeTab === "weddings" && (
                 <section className="py-16 bg-background">
@@ -347,7 +402,12 @@ const Work = () => {
                                         alt={photo.alt}
                                         loading="lazy"
                                         crossOrigin="anonymous"
-                                        onError={(e) => { (e.target as HTMLImageElement).src = weddingCover; }}
+                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                        onError={(e) => {
+                                            const el = e.target as HTMLImageElement;
+                                            el.onerror = null;
+                                            el.src = weddingCover;
+                                        }}
                                     />
                                     {(photo.mediaType === 'youtube' || photo.mediaType === 'gdrive') && (
                                         <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 5, pointerEvents: 'none' }}>
