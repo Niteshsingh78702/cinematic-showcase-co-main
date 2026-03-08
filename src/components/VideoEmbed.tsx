@@ -104,34 +104,30 @@ const VideoEmbed = ({ url, title = "Video", className = "", mediaType }: VideoEm
         const isPortrait = ratioDetected && videoRatio < 1;
 
         return (
-            <div className={`${isPortrait ? "flex justify-center" : ""} ${className}`}>
-                <div
-                    className={`relative ${isPortrait ? "w-full max-w-sm" : "w-full"}`}
+            <div className={`flex justify-center ${className}`}>
+                <video
+                    ref={videoRef}
+                    src={videoSrc}
+                    title={title}
+                    controls
+                    playsInline
+                    preload="metadata"
+                    className="rounded-sm bg-black"
                     style={{
-                        aspectRatio: ratioDetected ? String(videoRatio) : "16/9",
-                        maxHeight: isPortrait ? "70vh" : undefined,
+                        maxWidth: "100%",
+                        width: isPortrait ? "auto" : "100%",
+                        maxHeight: isPortrait ? "65vh" : undefined,
+                    }}
+                    onLoadedMetadata={() => {
+                        const vid = videoRef.current;
+                        if (vid && vid.videoWidth && vid.videoHeight) {
+                            setVideoRatio(vid.videoWidth / vid.videoHeight);
+                            setRatioDetected(true);
+                        }
                     }}
                 >
-                    <video
-                        ref={videoRef}
-                        src={videoSrc}
-                        title={title}
-                        controls
-                        playsInline
-                        preload="metadata"
-                        className="w-full h-full rounded-sm bg-black"
-                        style={{ objectFit: isPortrait ? "cover" : "contain" }}
-                        onLoadedMetadata={() => {
-                            const vid = videoRef.current;
-                            if (vid && vid.videoWidth && vid.videoHeight) {
-                                setVideoRatio(vid.videoWidth / vid.videoHeight);
-                                setRatioDetected(true);
-                            }
-                        }}
-                    >
-                        Your browser does not support the video tag.
-                    </video>
-                </div>
+                    Your browser does not support the video tag.
+                </video>
             </div>
         );
     }
