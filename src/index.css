@@ -438,7 +438,6 @@
   border: 1px solid hsl(30, 10%, 18%);
   box-shadow: 0 8px 32px -4px rgba(0, 0, 0, 0.5);
   transition: box-shadow 0.3s ease, border-color 0.3s ease;
-  aspect-ratio: 16 / 9;
 }
 
 .yt-embed-wrapper:hover {

@@ -2,7 +2,8 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { Film, Music, Heart, Camera, Clapperboard } from "lucide-react";
+import { Film, Music, Heart, Camera, Clapperboard, Sparkles, MapPin, Clock, Users, Star } from "lucide-react";
+import weddingCover from "@/assets/wedding-cover.jpg";
 
 const fadeInUp = {
     hidden: { opacity: 0, y: 30 },
@@ -114,8 +115,186 @@ const Services = () => {
                 </div>
             </section>
 
-            {/* CTA Section */}
+            {/* ====== Pre-Wedding & Wedding Shooting Showcase ====== */}
             <section className="py-20 bg-gradient-dark">
+                <div className="container mx-auto px-6">
+                    {/* Section Header */}
+                    <motion.div
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.6 }}
+                        variants={fadeInUp}
+                        className="text-center mb-16"
+                    >
+                        <p className="text-primary text-sm tracking-[0.3em] uppercase mb-3 font-body">Celebrate Love</p>
+                        <h2 className="text-4xl md:text-5xl font-display font-bold text-gradient-gold mb-4">
+                            Pre-Wedding & Wedding Shooting
+                        </h2>
+                        <p className="text-muted-foreground font-body max-w-2xl mx-auto">
+                            Your love story deserves to be told with cinematic artistry. From dreamy pre-wedding shoots at
+                            scenic locations to complete wedding day coverage — we turn your special moments into timeless memories.
+                        </p>
+                        <div className="section-divider w-32 mx-auto mt-6" />
+                    </motion.div>
+
+                    {/* Hero Image + Intro */}
+                    <motion.div
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.6, delay: 0.15 }}
+                        variants={fadeInUp}
+                        className="max-w-5xl mx-auto mb-16"
+                    >
+                        <div className="relative rounded-sm overflow-hidden border border-border shadow-gold">
+                            <img
+                                src={weddingCover}
+                                alt="Pre-Wedding & Wedding Shooting by MG Films"
+                                className="w-full h-[340px] md:h-[420px] object-cover"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent" />
+                            <div className="absolute bottom-0 left-0 right-0 p-8">
+                                <p className="text-primary text-xs tracking-[0.2em] uppercase font-body mb-2">MG Films Weddings</p>
+                                <h3 className="text-2xl md:text-3xl font-display font-bold text-foreground">
+                                    Every Love Story Is <span className="text-gradient-gold">Beautiful</span>
+                                </h3>
+                                <p className="text-muted-foreground font-body text-sm max-w-lg mt-2">
+                                    We blend candid storytelling with cinematic visuals to craft wedding films
+                                    and photographs that you'll cherish for a lifetime.
+                                </p>
+                            </div>
+                        </div>
+                    </motion.div>
+
+                    {/* Our Process */}
+                    <div className="max-w-5xl mx-auto mb-16">
+                        <motion.h3
+                            initial="hidden"
+                            whileInView="visible"
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.5 }}
+                            variants={fadeInUp}
+                            className="text-2xl font-display font-bold text-foreground text-center mb-10"
+                        >
+                            How We Work
+                        </motion.h3>
+                        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                            {[
+                                { icon: Users, step: "01", title: "Consultation", desc: "We sit down with you to understand your vision, preferred style, and any special moments you want captured." },
+                                { icon: MapPin, step: "02", title: "Location & Planning", desc: "We scout the best locations — outdoor landscapes, heritage sites, or destination venues — and craft a detailed shoot plan." },
+                                { icon: Camera, step: "03", title: "The Shoot", desc: "On the day, our team uses multi-camera setups, drone cinematography, and candid techniques to capture every emotion." },
+                                { icon: Sparkles, step: "04", title: "Cinematic Delivery", desc: "We deliver color-graded photos, highlight reels, and a full cinematic wedding film with sound design and music." },
+                            ].map((item, i) => (
+                                <motion.div
+                                    key={item.step}
+                                    initial="hidden"
+                                    whileInView="visible"
+                                    viewport={{ once: true }}
+                                    transition={{ duration: 0.5, delay: i * 0.1 }}
+                                    variants={fadeInUp}
+                                    className="relative p-6 rounded-sm border border-border bg-card/50 hover:border-gold/30 transition-all group text-center"
+                                >
+                                    <span className="text-3xl font-display font-bold text-primary/20 absolute top-3 right-4">{item.step}</span>
+                                    <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-primary/20 transition-colors">
+                                        <item.icon className="w-6 h-6 text-primary" />
+                                    </div>
+                                    <h4 className="text-base font-display font-semibold text-foreground mb-2">{item.title}</h4>
+                                    <p className="text-muted-foreground text-xs font-body leading-relaxed">{item.desc}</p>
+                                </motion.div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Two Highlight Cards — Pre-Wedding + Wedding Day */}
+                    <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto mb-16">
+                        {/* Pre-Wedding */}
+                        <motion.div
+                            initial="hidden"
+                            whileInView="visible"
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.5 }}
+                            variants={fadeInUp}
+                            className="p-8 rounded-sm border border-border bg-card/60 hover:border-gold/30 transition-all"
+                        >
+                            <div className="flex items-center gap-3 mb-5">
+                                <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                                    <Heart className="w-5 h-5 text-primary" />
+                                </div>
+                                <h3 className="text-xl font-display font-semibold text-foreground">Pre-Wedding Shoot</h3>
+                            </div>
+                            <p className="text-muted-foreground font-body text-sm leading-relaxed mb-5">
+                                Create stunning memories before the big day. Our pre-wedding shoots are designed to
+                                capture the romance and chemistry between you and your partner in beautiful, hand-picked locations.
+                                Whether it's a serene lakeside, a lush forest, or an urban cityscape — we make every frame magical.
+                            </p>
+                            <ul className="space-y-2">
+                                {["Scenic outdoor & destination locations", "Cinematic couple posing direction", "Drone aerial shots included", "Same-day teaser edit available", "Outfit & mood board consultation"].map((item) => (
+                                    <li key={item} className="flex items-center gap-2 text-xs font-body text-foreground/70">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />
+                                        {item}
+                                    </li>
+                                ))}
+                            </ul>
+                        </motion.div>
+
+                        {/* Wedding Day */}
+                        <motion.div
+                            initial="hidden"
+                            whileInView="visible"
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.5, delay: 0.15 }}
+                            variants={fadeInUp}
+                            className="p-8 rounded-sm border border-border bg-card/60 hover:border-gold/30 transition-all"
+                        >
+                            <div className="flex items-center gap-3 mb-5">
+                                <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                                    <Star className="w-5 h-5 text-primary" />
+                                </div>
+                                <h3 className="text-xl font-display font-semibold text-foreground">Wedding Day Coverage</h3>
+                            </div>
+                            <p className="text-muted-foreground font-body text-sm leading-relaxed mb-5">
+                                Your wedding day is once in a lifetime — our team ensures every ritual, every laugh, and every
+                                tear of joy is preserved with cinematic perfection. From the Haldi ceremony to the grand reception,
+                                we provide end-to-end coverage with multi-camera setups and expert editing.
+                            </p>
+                            <ul className="space-y-2">
+                                {["Full-day multi-camera coverage", "Haldi, Mehendi, Sangeet & Reception", "Candid + traditional photography", "4K cinematic wedding film", "Same-day highlight edit"].map((item) => (
+                                    <li key={item} className="flex items-center gap-2 text-xs font-body text-foreground/70">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />
+                                        {item}
+                                    </li>
+                                ))}
+                            </ul>
+                        </motion.div>
+                    </div>
+
+                    {/* Key Features Strip */}
+                    <motion.div
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.5, delay: 0.2 }}
+                        variants={fadeInUp}
+                        className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4"
+                    >
+                        {[
+                            { icon: Camera, label: "4K Cinematography" },
+                            { icon: MapPin, label: "Destination Shoots" },
+                            { icon: Clock, label: "Quick Delivery" },
+                            { icon: Sparkles, label: "Cinematic Editing" },
+                        ].map((feat, i) => (
+                            <div key={feat.label} className="flex flex-col items-center gap-2 py-5 rounded-sm bg-card/40 border border-border hover:border-gold/20 transition-all">
+                                <feat.icon className="w-6 h-6 text-primary" />
+                                <span className="text-xs font-body text-foreground/80 text-center">{feat.label}</span>
+                            </div>
+                        ))}
+                    </motion.div>
+                </div>
+            </section>
+
+            {/* CTA Section */}
+            <section className="py-20 bg-card">
                 <div className="container mx-auto px-6 text-center">
                     <motion.div
                         initial="hidden"

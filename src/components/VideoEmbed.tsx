@@ -1,3 +1,4 @@
+import { useState, useRef } from "react";
 import YouTubeEmbed from "./YouTubeEmbed";
 import GoogleDriveEmbed from "./GoogleDriveEmbed";
 
@@ -76,13 +77,21 @@ interface VideoEmbedProps {
 
 /**
  * Auto-detects the video source and renders the appropriate embed.
- * - YouTube → delegates to YouTubeEmbed (untouched)
+ * Automatically adjusts the container to match the video's native aspect ratio.
+ * - Portrait videos → centered, narrower container with max-height cap
+ * - Landscape videos → full-width container
+ * - YouTube → delegates to YouTubeEmbed (always 16:9)
  * - Google Drive → delegates to GoogleDriveEmbed
- * - Local/uploaded → renders HTML5 video player
+ * - Local/uploaded → renders HTML5 video player with smart ratio detection
  * - Unknown → falls back to YouTubeEmbed (backward compatible)
  */
 const VideoEmbed = ({ url, title = "Video", className = "", mediaType }: VideoEmbedProps) => {
     const type = detectVideoType(url, mediaType);
+
+    /* Hooks must be called unconditionally (React rules) */
+    const videoRef = useRef<HTMLVideoElement>(null);
+    const [videoRatio, setVideoRatio] = useState<number>(16 / 9);
+    const [ratioDetected, setRatioDetected] = useState(false);
 
     if (type === "gdrive") {
         const fileId = extractGDriveFileId(url);
@@ -92,19 +101,37 @@ const VideoEmbed = ({ url, title = "Video", className = "", mediaType }: VideoEm
     if (type === "local") {
         // Resolve the video URL — prepend API base if it's a relative path
         const videoSrc = url.startsWith("http") ? url : `${import.meta.env.VITE_API_URL || ""}${url}`;
+        const isPortrait = ratioDetected && videoRatio < 1;
+
         return (
-            <div className={`relative w-full ${className}`} style={{ aspectRatio: "16/9" }}>
-                <video
-                    src={videoSrc}
-                    title={title}
-                    controls
-                    playsInline
-                    preload="metadata"
-                    className="w-full h-full rounded-sm bg-black"
-                    style={{ objectFit: "contain" }}
+            <div className={`${isPortrait ? "flex justify-center" : ""} ${className}`}>
+                <div
+                    className={`relative ${isPortrait ? "w-full max-w-sm" : "w-full"}`}
+                    style={{
+                        aspectRatio: ratioDetected ? String(videoRatio) : "16/9",
+                        maxHeight: isPortrait ? "70vh" : undefined,
+                    }}
                 >
-                    Your browser does not support the video tag.
-                </video>
+                    <video
+                        ref={videoRef}
+                        src={videoSrc}
+                        title={title}
+                        controls
+                        playsInline
+                        preload="metadata"
+                        className="w-full h-full rounded-sm bg-black"
+                        style={{ objectFit: isPortrait ? "cover" : "contain" }}
+                        onLoadedMetadata={() => {
+                            const vid = videoRef.current;
+                            if (vid && vid.videoWidth && vid.videoHeight) {
+                                setVideoRatio(vid.videoWidth / vid.videoHeight);
+                                setRatioDetected(true);
+                            }
+                        }}
+                    >
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
             </div>
         );
     }
@@ -115,3 +142,4 @@ const VideoEmbed = ({ url, title = "Video", className = "", mediaType }: VideoEm
 };
 
 export default VideoEmbed;
+
