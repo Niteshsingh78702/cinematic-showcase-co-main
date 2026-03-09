@@ -105,29 +105,41 @@ const VideoEmbed = ({ url, title = "Video", className = "", mediaType }: VideoEm
 
         return (
             <div className={`flex justify-center ${className}`}>
-                <video
-                    ref={videoRef}
-                    src={videoSrc}
-                    title={title}
-                    controls
-                    playsInline
-                    preload="metadata"
-                    className="rounded-sm bg-black"
+                <div
+                    className="relative overflow-hidden"
                     style={{
+                        width: isPortrait ? "fit-content" : "100%",
                         maxWidth: "100%",
-                        width: isPortrait ? "auto" : "100%",
-                        maxHeight: isPortrait ? "65vh" : undefined,
-                    }}
-                    onLoadedMetadata={() => {
-                        const vid = videoRef.current;
-                        if (vid && vid.videoWidth && vid.videoHeight) {
-                            setVideoRatio(vid.videoWidth / vid.videoHeight);
-                            setRatioDetected(true);
-                        }
+                        borderRadius: "6px",
+                        border: "1px solid hsl(30, 10%, 18%)",
+                        boxShadow: "0 8px 32px -4px rgba(0, 0, 0, 0.5)",
                     }}
                 >
-                    Your browser does not support the video tag.
-                </video>
+                    <video
+                        ref={videoRef}
+                        src={videoSrc}
+                        title={title}
+                        controls
+                        playsInline
+                        preload="metadata"
+                        className="bg-black block"
+                        style={{
+                            maxWidth: "100%",
+                            width: isPortrait ? "auto" : "100%",
+                            maxHeight: isPortrait ? "65vh" : undefined,
+                            display: "block",
+                        }}
+                        onLoadedMetadata={() => {
+                            const vid = videoRef.current;
+                            if (vid && vid.videoWidth && vid.videoHeight) {
+                                setVideoRatio(vid.videoWidth / vid.videoHeight);
+                                setRatioDetected(true);
+                            }
+                        }}
+                    >
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
             </div>
         );
     }

@@ -215,7 +215,7 @@ const Actress = () => {
                                     viewport={{ once: true }}
                                     transition={{ duration: 0.5, delay: i * 0.15 }}
                                     variants={fadeInUp}
-                                    className="yt-embed-wrapper"
+                                    className=""
                                 >
                                     {item.title && <p className="text-foreground font-body text-sm mb-2">{item.title}</p>}
                                     <VideoEmbed url={item.media_url!} title={item.title || "Showreel"} mediaType={item.media_type} />
@@ -229,7 +229,7 @@ const Actress = () => {
                             viewport={{ once: true }}
                             transition={{ duration: 0.5, delay: 0.2 }}
                             variants={fadeInUp}
-                            className="max-w-4xl mx-auto yt-embed-wrapper"
+                            className="max-w-4xl mx-auto"
                         >
                             <VideoEmbed url={showreelItems.length > 0 ? showreelItems[0].media_url! : "dQw4w9WgXcQ"} title="Monika Singh — Showreel" />
                         </motion.div>
