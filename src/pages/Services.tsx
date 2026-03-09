@@ -127,13 +127,14 @@ const Services = () => {
                         variants={fadeInUp}
                         className="text-center mb-16"
                     >
-                        <p className="text-primary text-sm tracking-[0.3em] uppercase mb-3 font-body">Celebrate Love</p>
+                        <p className="text-primary text-sm tracking-[0.3em] uppercase mb-3 font-body">Celebrate Your Love Story</p>
                         <h2 className="text-4xl md:text-5xl font-display font-bold text-gradient-gold mb-4">
                             Pre-Wedding & Wedding Shooting
                         </h2>
                         <p className="text-muted-foreground font-body max-w-2xl mx-auto">
-                            Your love story deserves to be told with cinematic artistry. From dreamy pre-wedding shoots at
-                            scenic locations to complete wedding day coverage — we turn your special moments into timeless memories.
+                            From romantic pre-wedding shoots set against breathtaking backdrops to capturing every heartfelt
+                            moment on your wedding day — MG Films transforms your celebration into a cinematic masterpiece
+                            that you'll relive forever.
                         </p>
                         <div className="section-divider w-32 mx-auto mt-6" />
                     </motion.div>
@@ -157,11 +158,12 @@ const Services = () => {
                             <div className="absolute bottom-0 left-0 right-0 p-8">
                                 <p className="text-primary text-xs tracking-[0.2em] uppercase font-body mb-2">MG Films Weddings</p>
                                 <h3 className="text-2xl md:text-3xl font-display font-bold text-foreground">
-                                    Every Love Story Is <span className="text-gradient-gold">Beautiful</span>
+                                    Where Every Frame Tells Your <span className="text-gradient-gold">Love Story</span>
                                 </h3>
                                 <p className="text-muted-foreground font-body text-sm max-w-lg mt-2">
-                                    We blend candid storytelling with cinematic visuals to craft wedding films
-                                    and photographs that you'll cherish for a lifetime.
+                                    We don't just capture weddings — we create cinematic experiences. Our team blends candid
+                                    emotion, stunning drone visuals, and storytelling to deliver wedding films and photographs
+                                    that feel like a Bollywood movie.
                                 </p>
                             </div>
                         </div>
@@ -181,10 +183,10 @@ const Services = () => {
                         </motion.h3>
                         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
                             {[
-                                { icon: Users, step: "01", title: "Consultation", desc: "We sit down with you to understand your vision, preferred style, and any special moments you want captured." },
-                                { icon: MapPin, step: "02", title: "Location & Planning", desc: "We scout the best locations — outdoor landscapes, heritage sites, or destination venues — and craft a detailed shoot plan." },
-                                { icon: Camera, step: "03", title: "The Shoot", desc: "On the day, our team uses multi-camera setups, drone cinematography, and candid techniques to capture every emotion." },
-                                { icon: Sparkles, step: "04", title: "Cinematic Delivery", desc: "We deliver color-graded photos, highlight reels, and a full cinematic wedding film with sound design and music." },
+                                { icon: Users, step: "01", title: "Free Consultation", desc: "Tell us your dream wedding vision. We discuss themes, outfits, locations, and the moments that matter most to you — all at no cost." },
+                                { icon: MapPin, step: "02", title: "Location Recce & Planning", desc: "From riverside sunsets to royal heritage forts — we handpick the perfect locations and create a detailed shoot plan tailored to your style." },
+                                { icon: Camera, step: "03", title: "The Cinematic Shoot", desc: "Our professional crew arrives with 4K cameras, gimbal stabilizers, drones, and lighting to capture every glance, every smile, every tear of joy." },
+                                { icon: Sparkles, step: "04", title: "Delivery & Memories", desc: "Receive beautifully color-graded photos, a cinematic highlight reel, and a full wedding film — all delivered within 2–3 weeks." },
                             ].map((item, i) => (
                                 <motion.div
                                     key={item.step}
@@ -224,12 +226,12 @@ const Services = () => {
                                 <h3 className="text-xl font-display font-semibold text-foreground">Pre-Wedding Shoot</h3>
                             </div>
                             <p className="text-muted-foreground font-body text-sm leading-relaxed mb-5">
-                                Create stunning memories before the big day. Our pre-wedding shoots are designed to
-                                capture the romance and chemistry between you and your partner in beautiful, hand-picked locations.
-                                Whether it's a serene lakeside, a lush forest, or an urban cityscape — we make every frame magical.
+                                Make your engagement unforgettable. Our pre-wedding shoots are more than just photos — they're
+                                a cinematic experience in stunning locations. We guide every pose, every look, every moment to
+                                create visuals that will leave your family and friends speechless.
                             </p>
                             <ul className="space-y-2">
-                                {["Scenic outdoor & destination locations", "Cinematic couple posing direction", "Drone aerial shots included", "Same-day teaser edit available", "Outfit & mood board consultation"].map((item) => (
+                                {["Scenic outdoor & destination locations", "Professional posing & expression guidance", "Drone aerial shots & cinematic slow-motion", "Same-day Instagram-ready teaser", "Outfit & theme consultation included"].map((item) => (
                                     <li key={item} className="flex items-center gap-2 text-xs font-body text-foreground/70">
                                         <span className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />
                                         {item}
@@ -254,12 +256,12 @@ const Services = () => {
                                 <h3 className="text-xl font-display font-semibold text-foreground">Wedding Day Coverage</h3>
                             </div>
                             <p className="text-muted-foreground font-body text-sm leading-relaxed mb-5">
-                                Your wedding day is once in a lifetime — our team ensures every ritual, every laugh, and every
-                                tear of joy is preserved with cinematic perfection. From the Haldi ceremony to the grand reception,
-                                we provide end-to-end coverage with multi-camera setups and expert editing.
+                                Your wedding happens once — we make sure nothing is missed. From the Haldi ceremony at sunrise
+                                to the last dance at the reception, our team provides complete cinematic coverage. Multiple cameras,
+                                candid storytelling, and professional editing — your wedding film will feel like a feature film.
                             </p>
                             <ul className="space-y-2">
-                                {["Full-day multi-camera coverage", "Haldi, Mehendi, Sangeet & Reception", "Candid + traditional photography", "4K cinematic wedding film", "Same-day highlight edit"].map((item) => (
+                                {["Full-day multi-camera & drone coverage", "Haldi, Mehendi, Sangeet, Baraat & Reception", "Candid moments + traditional group photos", "4K cinematic wedding film with music", "Same-day highlight edit for social sharing"].map((item) => (
                                     <li key={item} className="flex items-center gap-2 text-xs font-body text-foreground/70">
                                         <span className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />
                                         {item}
@@ -279,10 +281,10 @@ const Services = () => {
                         className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4"
                     >
                         {[
-                            { icon: Camera, label: "4K Cinematography" },
-                            { icon: MapPin, label: "Destination Shoots" },
-                            { icon: Clock, label: "Quick Delivery" },
-                            { icon: Sparkles, label: "Cinematic Editing" },
+                            { icon: Camera, label: "4K Cinematic Quality" },
+                            { icon: MapPin, label: "Destination Weddings" },
+                            { icon: Clock, label: "Fast 2-Week Delivery" },
+                            { icon: Sparkles, label: "Bollywood-Style Editing" },
                         ].map((feat, i) => (
                             <div key={feat.label} className="flex flex-col items-center gap-2 py-5 rounded-sm bg-card/40 border border-border hover:border-gold/20 transition-all">
                                 <feat.icon className="w-6 h-6 text-primary" />
