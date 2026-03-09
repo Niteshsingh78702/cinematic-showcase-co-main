@@ -74,7 +74,7 @@ const FeaturedFilm = () => {
                         viewport={{ once: true }}
                         transition={{ duration: 0.5, delay: 0.1 }}
                         variants={fadeInUp}
-                        className="yt-embed-wrapper"
+                        className=""
                     >
                         <VideoEmbed url={featured?.media_url || "dQw4w9WgXcQ"} title={`${title} — Official Trailer`} mediaType={featured?.media_type} />
                     </motion.div>

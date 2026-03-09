@@ -294,7 +294,7 @@ const Work = () => {
                                     className="film-card"
                                 >
                                     <div className="grid md:grid-cols-[1.6fr_1fr] gap-0">
-                                        <div className="yt-embed-wrapper border-0 rounded-none shadow-none">
+                                        <div>
                                             <VideoEmbed url={film.fullUrl} title={film.title} mediaType={film.mediaType} />
                                         </div>
                                         <div className="p-6 md:p-8 flex flex-col justify-center">
@@ -342,7 +342,7 @@ const Work = () => {
                                         variants={fadeInUp}
                                         className="film-card overflow-hidden"
                                     >
-                                        <div className="yt-embed-wrapper border-0 rounded-none shadow-none">
+                                        <div>
                                             <VideoEmbed url={trailer.fullUrl} title={trailer.title} mediaType={trailer.mediaType} />
                                         </div>
                                         <div className="p-4">
