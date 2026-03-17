@@ -3,6 +3,10 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import monikaPic from "@/assets/monika.png";
 import { Heart, Film, Music, Award, Users } from "lucide-react";
+import { useContent } from "@/hooks/useContent";
+import VideoEmbed from "@/components/VideoEmbed";
+
+const API_URL = import.meta.env.VITE_API_URL || "";
 
 const fadeInUp = {
     hidden: { opacity: 0, y: 30 },
@@ -10,6 +14,8 @@ const fadeInUp = {
 };
 
 const About = () => {
+    const { items: aboutItems, loading } = useContent("about");
+
     return (
         <div className="min-h-screen bg-background">
             <Navbar />
@@ -31,6 +37,82 @@ const About = () => {
                     </motion.div>
                 </div>
             </section>
+
+            {/* Dynamic About Content from Admin Panel */}
+            {!loading && aboutItems.length > 0 && (
+                <section className="py-20 bg-gradient-dark">
+                    <div className="container mx-auto px-6">
+                        <div className="max-w-6xl mx-auto space-y-16">
+                            {aboutItems.map((item, index) => {
+                                const hasMedia = !!item.media_url;
+                                const isVideo = item.media_type === "video" || item.media_type === "youtube";
+
+                                return (
+                                    <motion.div
+                                        key={item.id}
+                                        initial="hidden"
+                                        whileInView="visible"
+                                        viewport={{ once: true }}
+                                        transition={{ duration: 0.6, delay: index * 0.1 }}
+                                        variants={fadeInUp}
+                                        className={`grid ${hasMedia ? "lg:grid-cols-2" : ""} gap-12 items-center`}
+                                    >
+                                        {/* Media */}
+                                        {hasMedia && (
+                                            <div className={`relative ${index % 2 === 1 ? "lg:order-2" : ""}`}>
+                                                {isVideo ? (
+                                                    <VideoEmbed
+                                                        url={item.media_url!}
+                                                        title={item.title || "About Video"}
+                                                        mediaType={item.media_type}
+                                                    />
+                                                ) : (
+                                                    <div className="relative overflow-hidden rounded-sm shadow-gold">
+                                                        <img
+                                                            src={
+                                                                item.media_url!.startsWith("http")
+                                                                    ? item.media_url!
+                                                                    : `${API_URL}${item.media_url}`
+                                                            }
+                                                            alt={item.title || "About MG Films"}
+                                                            className="w-full h-[400px] object-cover"
+                                                            loading="lazy"
+                                                        />
+                                                        <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent" />
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+
+                                        {/* Text Content */}
+                                        <div className={!hasMedia ? "max-w-3xl mx-auto text-center" : ""}>
+                                            {item.title && (
+                                                <h3 className="text-2xl md:text-3xl font-display font-bold text-foreground mb-4">
+                                                    {item.title}
+                                                </h3>
+                                            )}
+                                            {item.description && (
+                                                <div>
+                                                    {item.description.split("\n\n").map((para, i) => (
+                                                        <p key={i} className="text-muted-foreground font-body leading-relaxed mb-4">
+                                                            {para}
+                                                        </p>
+                                                    ))}
+                                                </div>
+                                            )}
+                                            {item.category && (
+                                                <span className="inline-block px-4 py-1.5 text-xs tracking-wider uppercase border border-gold/30 text-primary rounded-sm font-body mt-2">
+                                                    {item.category}
+                                                </span>
+                                            )}
+                                        </div>
+                                    </motion.div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                </section>
+            )}
 
             {/* Our Story */}
             <section className="py-20 bg-card">
