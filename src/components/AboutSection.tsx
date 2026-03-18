@@ -1,6 +1,9 @@
 import { motion } from "framer-motion";
 import { useContent } from "@/hooks/useContent";
+import VideoEmbed from "@/components/VideoEmbed";
 import monikaPic from "@/assets/monika.png";
+
+const API_URL = import.meta.env.VITE_API_URL || "";
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 30 },
@@ -8,19 +11,13 @@ const fadeInUp = {
 };
 
 const AboutSection = () => {
-  const { items } = useContent("about");
-
-  /* Use first about item for main text, fallback to defaults */
-  const aboutData = items.length > 0 ? items[0] : null;
-  const heading = aboutData?.title || "From Regional Roots to Big Screens";
-  const description = aboutData?.description || `MG Films is a creative production house specializing in regional music albums, short films, and premium wedding cinematography. We bring stories to life through the rich cultural traditions of Purulia Bangla, Khortha, and Santhali art forms.
-
-Our debut picture film "Milloner Bela" (2:10:10) showcases our commitment to powerful storytelling with cinematic quality.`;
-  const portraitImage = aboutData?.media_url || monikaPic;
+  const { items, loading } = useContent("about");
+  const hasAdminItems = !loading && items.length > 0;
 
   return (
     <section id="about" className="py-24 bg-gradient-dark">
       <div className="container mx-auto px-6">
+        {/* Section Header */}
         <motion.div
           initial="hidden"
           whileInView="visible"
@@ -36,62 +33,138 @@ Our debut picture film "Milloner Bela" (2:10:10) showcases our commitment to pow
           <div className="section-divider w-32 mx-auto mt-6" />
         </motion.div>
 
-        <div className="grid lg:grid-cols-2 gap-16 items-center max-w-6xl mx-auto">
-          {/* Text */}
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            variants={fadeInUp}
-          >
-            <h3 className="text-2xl font-display font-semibold text-foreground mb-6">
-              {heading}
-            </h3>
-            {description.split("\n\n").map((para, i) => (
-              <p key={i} className="text-muted-foreground font-body leading-relaxed mb-6">
-                {para}
-              </p>
-            ))}
+        {/* Dynamic Admin Content */}
+        {hasAdminItems && (
+          <div className="max-w-6xl mx-auto space-y-16 mb-16">
+            {items.map((item, index) => {
+              const hasMedia = !!item.media_url;
+              const isVideo = item.media_type === "video" || item.media_type === "youtube";
 
-            <div className="flex flex-wrap gap-3">
-              {["Purulia Bangla", "Khortha", "Santhali"].map((tag) => (
-                <span
-                  key={tag}
-                  className="px-4 py-1.5 text-xs tracking-wider uppercase border border-gold/30 text-primary rounded-sm font-body"
+              return (
+                <motion.div
+                  key={item.id}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true, margin: "-100px" }}
+                  transition={{ duration: 0.6, delay: index * 0.1 }}
+                  variants={fadeInUp}
+                  className={`grid ${hasMedia ? "lg:grid-cols-2" : ""} gap-12 items-center`}
                 >
-                  {tag}
-                </span>
-              ))}
-            </div>
-          </motion.div>
+                  {/* Media */}
+                  {hasMedia && (
+                    <div className={`relative ${index % 2 === 1 ? "lg:order-2" : ""}`}>
+                      {isVideo ? (
+                        <VideoEmbed
+                          url={item.media_url!}
+                          title={item.title || "About Video"}
+                          mediaType={item.media_type}
+                        />
+                      ) : (
+                        <div className="relative overflow-hidden rounded-sm shadow-gold">
+                          <img
+                            src={
+                              item.media_url!.startsWith("http")
+                                ? item.media_url!
+                                : `${API_URL}${item.media_url}`
+                            }
+                            alt={item.title || "About MG Films"}
+                            className="w-full h-[400px] object-cover"
+                            loading="lazy"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent" />
+                        </div>
+                      )}
+                    </div>
+                  )}
 
-          {/* Portrait */}
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            variants={fadeInUp}
-            className="relative"
-          >
-            <div className="relative overflow-hidden rounded-sm shadow-gold">
-              <img
-                src={portraitImage}
-                alt="Monika Singh - Actress & Co-Founder"
-                className="w-full h-[500px] object-contain bg-black"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-transparent" />
-              <div className="absolute bottom-0 left-0 right-0 p-6">
-                <h4 className="text-xl font-display font-semibold text-foreground">Monika Singh</h4>
-                <p className="text-primary text-sm font-body">Actress • Album Performer • Co-Founder</p>
-                <p className="text-muted-foreground text-xs font-body mt-2">
-                  Regional actress working in Purulia Bangla, Khortha and Santhali music albums and short films.
-                </p>
+                  {/* Text Content */}
+                  <div className={!hasMedia ? "max-w-3xl mx-auto text-center" : ""}>
+                    {item.title && (
+                      <h3 className="text-2xl md:text-3xl font-display font-bold text-foreground mb-4">
+                        {item.title}
+                      </h3>
+                    )}
+                    {item.description && (
+                      <div>
+                        {item.description.split("\n\n").map((para, i) => (
+                          <p key={i} className="text-muted-foreground font-body leading-relaxed mb-4">
+                            {para}
+                          </p>
+                        ))}
+                      </div>
+                    )}
+                    {item.category && (
+                      <span className="inline-block px-4 py-1.5 text-xs tracking-wider uppercase border border-gold/30 text-primary rounded-sm font-body mt-2">
+                        {item.category}
+                      </span>
+                    )}
+                  </div>
+                </motion.div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Hardcoded Fallback / Always-visible Portrait Section */}
+        {!hasAdminItems && (
+          <div className="grid lg:grid-cols-2 gap-16 items-center max-w-6xl mx-auto">
+            {/* Text */}
+            <motion.div
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              variants={fadeInUp}
+            >
+              <h3 className="text-2xl font-display font-semibold text-foreground mb-6">
+                From Regional Roots to Big Screens
+              </h3>
+              <p className="text-muted-foreground font-body leading-relaxed mb-6">
+                MG Films is a creative production house specializing in regional music albums, short films, and premium wedding cinematography. We bring stories to life through the rich cultural traditions of Purulia Bangla, Khortha, and Santhali art forms.
+              </p>
+              <p className="text-muted-foreground font-body leading-relaxed mb-6">
+                Our debut picture film "Milloner Bela" (2:10:10) showcases our commitment to powerful storytelling with cinematic quality.
+              </p>
+
+              <div className="flex flex-wrap gap-3">
+                {["Purulia Bangla", "Khortha", "Santhali"].map((tag) => (
+                  <span
+                    key={tag}
+                    className="px-4 py-1.5 text-xs tracking-wider uppercase border border-gold/30 text-primary rounded-sm font-body"
+                  >
+                    {tag}
+                  </span>
+                ))}
               </div>
-            </div>
-          </motion.div>
-        </div>
+            </motion.div>
+
+            {/* Portrait */}
+            <motion.div
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              variants={fadeInUp}
+              className="relative"
+            >
+              <div className="relative overflow-hidden rounded-sm shadow-gold">
+                <img
+                  src={monikaPic}
+                  alt="Monika Singh - Actress & Co-Founder"
+                  className="w-full h-[500px] object-contain bg-black"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-transparent" />
+                <div className="absolute bottom-0 left-0 right-0 p-6">
+                  <h4 className="text-xl font-display font-semibold text-foreground">Monika Singh</h4>
+                  <p className="text-primary text-sm font-body">Actress • Album Performer • Co-Founder</p>
+                  <p className="text-muted-foreground text-xs font-body mt-2">
+                    Regional actress working in Purulia Bangla, Khortha and Santhali music albums and short films.
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
       </div>
     </section>
   );
