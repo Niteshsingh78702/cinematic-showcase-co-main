@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import YouTubeEmbed from "./YouTubeEmbed";
 import GoogleDriveEmbed from "./GoogleDriveEmbed";
+import { resolveMediaUrl } from "@/lib/resolveMediaUrl";
 
 /* ---- URL detection helpers ---- */
 
@@ -99,8 +100,8 @@ const VideoEmbed = ({ url, title = "Video", className = "", mediaType }: VideoEm
     }
 
     if (type === "local") {
-        // Resolve the video URL — prepend API base if it's a relative path
-        const videoSrc = url.startsWith("http") ? url : `${import.meta.env.VITE_API_URL || ""}${url}`;
+        // Resolve the video URL — rewrite /uploads/ to /api/media/ to bypass CDN
+        const videoSrc = resolveMediaUrl(url);
         const isPortrait = ratioDetected && videoRatio < 1;
 
         return (

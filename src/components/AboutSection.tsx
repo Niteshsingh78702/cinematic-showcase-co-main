@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { useContent } from "@/hooks/useContent";
 import VideoEmbed from "@/components/VideoEmbed";
+import { resolveMediaUrl } from "@/lib/resolveMediaUrl";
 import monikaPic from "@/assets/monika.png";
 
 const API_URL = import.meta.env.VITE_API_URL || "";
@@ -62,14 +63,20 @@ const AboutSection = () => {
                       ) : (
                         <div className="relative overflow-hidden rounded-sm shadow-gold">
                           <img
-                            src={
-                              item.media_url!.startsWith("http")
-                                ? item.media_url!
-                                : `${API_URL}${item.media_url}`
-                            }
+                            src={resolveMediaUrl(item.media_url!)}
                             alt={item.title || "About MG Films"}
                             className="w-full h-[400px] object-cover"
                             loading="lazy"
+                            onError={(e) => {
+                              const el = e.target as HTMLImageElement;
+                              // Try original /uploads/ path as fallback
+                              if (el.src.includes('/api/media/') && item.media_url) {
+                                el.src = item.media_url.startsWith('http') ? item.media_url : `${API_URL}${item.media_url}`;
+                              } else {
+                                el.style.background = 'linear-gradient(135deg, hsl(20,10%,12%), hsl(20,10%,8%))';
+                                el.alt = item.title || 'Image unavailable';
+                              }
+                            }}
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent" />
                         </div>

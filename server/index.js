@@ -29,7 +29,25 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
 // Upload directory for media files
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// Set headers to bypass Hostinger CDN image processing (prevents 422 errors)
+app.use('/uploads', (req, res, next) => {
+    res.setHeader('Cache-Control', 'public, max-age=31536000, no-transform');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('CDN-Cache-Control', 'no-transform');
+    next();
+}, express.static(path.join(__dirname, 'uploads')));
+
+// Also serve uploads via API route as CDN-bypass fallback
+app.get('/api/media/*', (req, res) => {
+    const filePath = path.join(__dirname, 'uploads', req.params[0]);
+    if (fs.existsSync(filePath)) {
+        res.setHeader('Cache-Control', 'public, max-age=31536000, no-transform');
+        res.setHeader('CDN-Cache-Control', 'no-transform');
+        res.sendFile(filePath);
+    } else {
+        res.status(404).json({ error: 'File not found', path: req.params[0] });
+    }
+});
 
 // API Routes
 app.use('/api/auth', authRoutes);

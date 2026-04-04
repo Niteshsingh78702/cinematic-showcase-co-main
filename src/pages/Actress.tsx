@@ -6,6 +6,7 @@ import VideoEmbed from "@/components/VideoEmbed";
 import { isGoogleDriveUrl, isLocalVideoUrl } from "@/components/VideoEmbed";
 import ImageLightbox from "@/components/ImageLightbox";
 import { useContent, ContentItem } from "@/hooks/useContent";
+import { resolveMediaUrl } from "@/lib/resolveMediaUrl";
 import actressPortrait from "@/assets/actress-portrait.jpg";
 import monikaPic from "@/assets/monika.png";
 import heroBg from "@/assets/hero-bg.jpg";
@@ -58,9 +59,7 @@ const Actress = () => {
         return url;
     };
 
-    /* Resolve relative upload paths against the API base */
-    const resolveMediaUrl = (url: string): string =>
-        url.startsWith("http") ? url : `${import.meta.env.VITE_API_URL || ""}${url}`;
+    /* resolveMediaUrl imported from @/lib/resolveMediaUrl */
 
     /* Map API items to photos — use uploaded images when available */
     const photos = galleryContent.length > 0
