@@ -68,24 +68,23 @@ const About = () => {
                                                         mediaType={item.media_type}
                                                     />
                                                 ) : (
-                                                    <div className="relative overflow-hidden rounded-sm shadow-gold">
+                                                    <div className="relative overflow-hidden rounded-lg shadow-gold bg-black/20">
                                                         <img
                                                             src={resolveMediaUrl(item.media_url!)}
                                                             alt={item.title || "About MG Films"}
-                                                            className="w-full h-[400px] object-cover"
+                                                            className="w-full max-h-[520px] object-contain rounded-lg"
                                                             loading="lazy"
                                                             onError={(e) => {
                                                                 const el = e.target as HTMLImageElement;
-                                                                // Try original /uploads/ path as fallback
                                                                 if (el.src.includes('/api/media/') && item.media_url) {
                                                                     el.src = item.media_url.startsWith('http') ? item.media_url : `${API_URL}${item.media_url}`;
                                                                 } else {
                                                                     el.style.background = 'linear-gradient(135deg, hsl(20,10%,12%), hsl(20,10%,8%))';
-                                                                    el.alt = item.title || 'Image unavailable';
+                                                                    el.style.minHeight = '200px';
                                                                 }
                                                             }}
                                                         />
-                                                        <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent" />
+                                                        <div className="absolute inset-0 bg-gradient-to-t from-background/40 via-transparent to-transparent pointer-events-none rounded-lg" />
                                                     </div>
                                                 )}
                                             </div>
