@@ -28,8 +28,66 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Upload directory for media files
-// Set headers to bypass Hostinger CDN image processing (prevents 422 errors)
+// ============================================================
+// MEDIA SERVING — Database-first (persistent), local disk fallback
+// ============================================================
+
+// Serve uploaded files from DATABASE (survives restarts)
+app.get('/api/media/db/*', async (req, res) => {
+    try {
+        const fileKey = req.params[0];
+        const pool = (await import('./config/db.js')).default;
+        const [rows] = await pool.execute(
+            'SELECT mime_type, file_data FROM media_files WHERE file_key = ? LIMIT 1',
+            [fileKey]
+        );
+
+        if (rows.length > 0) {
+            res.setHeader('Content-Type', rows[0].mime_type);
+            res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+            res.setHeader('CDN-Cache-Control', 'no-transform');
+            return res.send(rows[0].file_data);
+        }
+
+        // Not in DB — try local disk as fallback
+        const filePath = path.join(__dirname, 'uploads', fileKey);
+        if (fs.existsSync(filePath)) {
+            res.setHeader('Cache-Control', 'public, max-age=31536000, no-transform');
+            return res.sendFile(filePath);
+        }
+
+        res.status(404).json({ error: 'File not found', key: fileKey });
+    } catch (err) {
+        console.error('Media serve error:', err.message);
+        res.status(500).json({ error: 'Failed to serve media' });
+    }
+});
+
+// Serve /uploads/* paths — check DB first (for old URLs), then local disk
+app.get('/uploads/*', async (req, res, next) => {
+    try {
+        const fileKey = req.params[0];
+        const pool = (await import('./config/db.js')).default;
+        const [rows] = await pool.execute(
+            'SELECT mime_type, file_data FROM media_files WHERE file_key = ? LIMIT 1',
+            [fileKey]
+        );
+
+        if (rows.length > 0) {
+            res.setHeader('Content-Type', rows[0].mime_type);
+            res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+            res.setHeader('CDN-Cache-Control', 'no-transform');
+            return res.send(rows[0].file_data);
+        }
+    } catch (err) {
+        // DB failed, fall through to static files
+    }
+
+    // Fall through to static file serving
+    next();
+});
+
+// Static uploads directory (fallback for any files still on disk)
 app.use('/uploads', (req, res, next) => {
     res.setHeader('Cache-Control', 'public, max-age=31536000, no-transform');
     res.setHeader('X-Content-Type-Options', 'nosniff');
@@ -37,15 +95,76 @@ app.use('/uploads', (req, res, next) => {
     next();
 }, express.static(path.join(__dirname, 'uploads')));
 
-// Also serve uploads via API route as CDN-bypass fallback
+// Legacy /api/media/* (non-db) — local disk fallback
 app.get('/api/media/*', (req, res) => {
     const filePath = path.join(__dirname, 'uploads', req.params[0]);
     if (fs.existsSync(filePath)) {
         res.setHeader('Cache-Control', 'public, max-age=31536000, no-transform');
-        res.setHeader('CDN-Cache-Control', 'no-transform');
         res.sendFile(filePath);
     } else {
         res.status(404).json({ error: 'File not found', path: req.params[0] });
+    }
+});
+
+// POST /api/migrate-uploads — one-time migration: move old /uploads/ files from disk to DB
+app.post('/api/migrate-uploads', async (req, res) => {
+    try {
+        const pool = (await import('./config/db.js')).default;
+
+        // Find all content items with old /uploads/ URLs
+        const [items] = await pool.execute(
+            "SELECT id, media_url FROM site_content WHERE media_url LIKE '/uploads/%'"
+        );
+
+        let migrated = 0;
+        let failed = 0;
+        let alreadyInDb = 0;
+
+        for (const item of items) {
+            const fileKey = item.media_url.replace('/uploads/', '');
+            const filePath = path.join(__dirname, 'uploads', fileKey);
+
+            // Check if already in DB
+            const [exists] = await pool.execute(
+                'SELECT id FROM media_files WHERE file_key = ?', [fileKey]
+            );
+            if (exists.length > 0) {
+                // Update URL to point to DB endpoint
+                await pool.execute(
+                    'UPDATE site_content SET media_url = ? WHERE id = ?',
+                    [`/api/media/db/${fileKey}`, item.id]
+                );
+                alreadyInDb++;
+                continue;
+            }
+
+            // Read from disk and store in DB
+            if (fs.existsSync(filePath)) {
+                const fileBuffer = fs.readFileSync(filePath);
+                const ext = path.extname(filePath).toLowerCase();
+                const mimeMap = { '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png', '.gif': 'image/gif', '.webp': 'image/webp', '.svg': 'image/svg+xml', '.mp4': 'video/mp4', '.webm': 'video/webm' };
+                const mime = mimeMap[ext] || 'application/octet-stream';
+
+                await pool.execute(
+                    'INSERT IGNORE INTO media_files (file_key, mime_type, file_data, file_size) VALUES (?, ?, ?, ?)',
+                    [fileKey, mime, fileBuffer, fileBuffer.length]
+                );
+
+                // Update the content URL to DB endpoint
+                await pool.execute(
+                    'UPDATE site_content SET media_url = ? WHERE id = ?',
+                    [`/api/media/db/${fileKey}`, item.id]
+                );
+                migrated++;
+            } else {
+                failed++;
+            }
+        }
+
+        res.json({ message: 'Migration complete', total: items.length, migrated, alreadyInDb, failed });
+    } catch (err) {
+        console.error('Migration error:', err);
+        res.status(500).json({ error: err.message });
     }
 });
 

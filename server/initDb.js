@@ -63,6 +63,19 @@ const initDatabase = async () => {
             )
         `);
 
+        // Create media_files table — stores uploaded files in DB so they survive restarts
+        await pool.execute(`
+            CREATE TABLE IF NOT EXISTS media_files (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                file_key VARCHAR(255) NOT NULL UNIQUE,
+                mime_type VARCHAR(100) NOT NULL,
+                file_data LONGBLOB NOT NULL,
+                file_size INT DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                INDEX idx_file_key (file_key)
+            )
+        `);
+
         // Seed admin user if none exists
         const [admins] = await pool.execute('SELECT COUNT(*) as count FROM admins');
         if (admins[0].count === 0) {
