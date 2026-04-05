@@ -135,10 +135,13 @@ const LocalVideoPlayer = ({ url, title, className }: { url: string; title: strin
                         width: isPortrait ? "fit-content" : "100%",
                         maxWidth: "100%",
                         aspectRatio: ratioDetected ? `${videoRatio}` : "16/9",
+                        minHeight: "200px",
                         borderRadius: "6px",
                         border: "1px solid hsl(30, 10%, 18%)",
                         boxShadow: "0 8px 32px -4px rgba(0, 0, 0, 0.5)",
-                        background: "#000",
+                        background: poster
+                            ? "#000"
+                            : "linear-gradient(135deg, hsl(20, 8%, 12%) 0%, hsl(25, 12%, 8%) 50%, hsl(30, 10%, 15%) 100%)",
                     }}
                     onClick={handlePlay}
                     role="button"
@@ -153,22 +156,64 @@ const LocalVideoPlayer = ({ url, title, className }: { url: string; title: strin
                         />
                     )}
 
+                    {/* Film strip icon when no poster (so it's not just blank) */}
+                    {!poster && (
+                        <div style={{
+                            position: "absolute",
+                            inset: 0,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            opacity: 0.15,
+                        }}>
+                            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ color: "#c9a96e" }}>
+                                <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18" />
+                                <line x1="7" y1="2" x2="7" y2="22" />
+                                <line x1="17" y1="2" x2="17" y2="22" />
+                                <line x1="2" y1="12" x2="22" y2="12" />
+                                <line x1="2" y1="7" x2="7" y2="7" />
+                                <line x1="2" y1="17" x2="7" y2="17" />
+                                <line x1="17" y1="7" x2="22" y2="7" />
+                                <line x1="17" y1="17" x2="22" y2="17" />
+                            </svg>
+                        </div>
+                    )}
+
                     {/* Gradient overlay */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20 transition-opacity group-hover:opacity-80" />
 
-                    {/* Play button — same style as YouTube/GDrive embeds */}
-                    <div className="play-overlay">
-                        <div className="play-btn">
-                            <svg viewBox="0 0 24 24">
+                    {/* Play button — inline styled so it's ALWAYS visible */}
+                    <div style={{
+                        position: "absolute",
+                        inset: 0,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        zIndex: 20,
+                    }}>
+                        <div style={{
+                            width: "64px",
+                            height: "64px",
+                            borderRadius: "50%",
+                            background: "rgba(201, 169, 110, 0.9)",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            boxShadow: "0 4px 20px rgba(0,0,0,0.4)",
+                            transition: "transform 0.3s, box-shadow 0.3s",
+                        }}
+                            className="group-hover:scale-110"
+                        >
+                            <svg viewBox="0 0 24 24" style={{ width: "28px", height: "28px", fill: "#1a1a1a", marginLeft: "3px" }}>
                                 <path d="M8 5v14l11-7z" />
                             </svg>
                         </div>
                     </div>
 
                     {/* Title overlay on hover */}
-                    <div className="absolute bottom-0 left-0 right-0 p-4 z-10">
-                        <p className="text-foreground font-body text-sm font-medium opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300">
-                            {title}
+                    <div className="absolute bottom-0 left-0 right-0 p-4" style={{ zIndex: 10 }}>
+                        <p className="text-sm font-medium opacity-0 group-hover:opacity-100 transition-all duration-300" style={{ color: "#c9a96e" }}>
+                            ▶ {title}
                         </p>
                     </div>
                 </div>
