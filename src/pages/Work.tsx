@@ -248,29 +248,43 @@ const Work = () => {
                                     exit={{ opacity: 0, scale: 0.9 }}
                                     transition={{ duration: 0.35 }}
                                     className="gallery-card aspect-video"
-                                    style={{ cursor: album.mediaType === 'youtube' || album.mediaType === 'gdrive' || album.link ? 'pointer' : 'default' }}
+                                    style={{ cursor: 'pointer' }}
                                     onClick={() => {
                                         if (album.mediaType === 'gdrive' && album.fullUrl) {
                                             setYtModal({ videoId: '', title: album.title, link: '', mediaType: 'gdrive', fullUrl: album.fullUrl });
                                         } else if (album.mediaType === 'youtube' && album.videoId) {
                                             setYtModal({ videoId: album.videoId, title: album.title, link: album.link });
+                                        } else if (album.mediaType === 'video' && album.fullUrl) {
+                                            setYtModal({ videoId: '', title: album.title, link: '', mediaType: 'local', fullUrl: resolveMediaUrl(album.fullUrl) });
                                         } else if (album.link) {
                                             window.open(album.link, '_blank');
                                         }
                                     }}
                                 >
-                                    <img
-                                        src={album.image}
-                                        alt={album.title}
-                                        loading="lazy"
-                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                        onError={(e) => {
-                                            const el = e.target as HTMLImageElement;
-                                            el.onerror = null;
-                                            el.src = albumCover;
-                                        }}
-                                    />
-                                    {(album.mediaType === 'youtube' || album.mediaType === 'gdrive') && (
+                                    {/* Thumbnail: use <video> for local videos, <img> for images/YouTube thumbnails */}
+                                    {album.mediaType === 'video' ? (
+                                        <video
+                                            src={album.image}
+                                            muted
+                                            preload="metadata"
+                                            playsInline
+                                            style={{ width: '100%', height: '100%', objectFit: 'cover', pointerEvents: 'none' }}
+                                            onLoadedData={(e) => { const v = e.target as HTMLVideoElement; v.currentTime = 0.5; }}
+                                        />
+                                    ) : (
+                                        <img
+                                            src={album.image}
+                                            alt={album.title}
+                                            loading="lazy"
+                                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                            onError={(e) => {
+                                                const el = e.target as HTMLImageElement;
+                                                el.onerror = null;
+                                                el.src = albumCover;
+                                            }}
+                                        />
+                                    )}
+                                    {(album.mediaType === 'youtube' || album.mediaType === 'gdrive' || album.mediaType === 'video') && (
                                         <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 5, pointerEvents: 'none' }}>
                                             <svg width="56" height="56" viewBox="0 0 24 24" fill="none">
                                                 <circle cx="12" cy="12" r="12" fill="rgba(0,0,0,0.6)" />
@@ -407,23 +421,37 @@ const Work = () => {
                                             setYtModal({ videoId: '', title: photo.alt, link: '', mediaType: 'gdrive', fullUrl: photo.fullUrl });
                                         } else if (photo.mediaType === 'youtube' && photo.videoId) {
                                             setYtModal({ videoId: photo.videoId, title: photo.alt, link: photo.link || '' });
+                                        } else if (photo.mediaType === 'video' && photo.fullUrl) {
+                                            setYtModal({ videoId: '', title: photo.alt, link: '', mediaType: 'local', fullUrl: resolveMediaUrl(photo.fullUrl) });
                                         } else {
                                             setLightboxIndex(i); setLightboxOpen(true);
                                         }
                                     }}
                                 >
-                                    <img
-                                        src={photo.src}
-                                        alt={photo.alt}
-                                        loading="lazy"
-                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                        onError={(e) => {
-                                            const el = e.target as HTMLImageElement;
-                                            el.onerror = null;
-                                            el.src = weddingCover;
-                                        }}
-                                    />
-                                    {(photo.mediaType === 'youtube' || photo.mediaType === 'gdrive') && (
+                                    {/* Thumbnail: use <video> for local videos, <img> for images */}
+                                    {photo.mediaType === 'video' ? (
+                                        <video
+                                            src={photo.src}
+                                            muted
+                                            preload="metadata"
+                                            playsInline
+                                            style={{ width: '100%', height: '100%', objectFit: 'cover', pointerEvents: 'none' }}
+                                            onLoadedData={(e) => { const v = e.target as HTMLVideoElement; v.currentTime = 0.5; }}
+                                        />
+                                    ) : (
+                                        <img
+                                            src={photo.src}
+                                            alt={photo.alt}
+                                            loading="lazy"
+                                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                            onError={(e) => {
+                                                const el = e.target as HTMLImageElement;
+                                                el.onerror = null;
+                                                el.src = weddingCover;
+                                            }}
+                                        />
+                                    )}
+                                    {(photo.mediaType === 'youtube' || photo.mediaType === 'gdrive' || photo.mediaType === 'video') && (
                                         <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 5, pointerEvents: 'none' }}>
                                             <svg width="56" height="56" viewBox="0 0 24 24" fill="none">
                                                 <circle cx="12" cy="12" r="12" fill="rgba(0,0,0,0.6)" />
@@ -433,7 +461,7 @@ const Work = () => {
                                     )}
                                     <div className="card-overlay">
                                         <h3>{photo.alt}</h3>
-                                        <p>{(photo.mediaType === 'youtube' || photo.mediaType === 'gdrive') ? '▶ Watch Video' : 'Wedding Collection'}</p>
+                                        <p>{(photo.mediaType === 'youtube' || photo.mediaType === 'gdrive' || photo.mediaType === 'video') ? '▶ Watch Video' : 'Wedding Collection'}</p>
                                     </div>
                                 </motion.div>
                             ))}
@@ -470,7 +498,19 @@ const Work = () => {
 
                         {/* Embedded video player */}
                         <div className="aspect-video bg-black rounded-lg overflow-hidden shadow-2xl">
-                            {ytModal.mediaType === 'gdrive' && ytModal.fullUrl ? (
+                            {ytModal.mediaType === 'local' && ytModal.fullUrl ? (
+                                <video
+                                    src={ytModal.fullUrl}
+                                    title={ytModal.title}
+                                    controls
+                                    autoPlay
+                                    playsInline
+                                    className="w-full h-full bg-black"
+                                    style={{ objectFit: 'contain' }}
+                                >
+                                    Your browser does not support the video tag.
+                                </video>
+                            ) : ytModal.mediaType === 'gdrive' && ytModal.fullUrl ? (
                                 <iframe
                                     src={`https://drive.google.com/file/d/${extractGDriveFileId(ytModal.fullUrl)}/preview`}
                                     title={ytModal.title}
