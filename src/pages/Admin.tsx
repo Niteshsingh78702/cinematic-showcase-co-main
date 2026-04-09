@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Trash2, LogOut, Edit, Save, X, Upload, Eye, EyeOff, MessageCircle, Check, Search } from "lucide-react";
+import { resolveMediaUrl } from "@/lib/resolveMediaUrl";
 
 const API_URL = import.meta.env.VITE_API_URL || "";
 
@@ -78,7 +79,7 @@ const getAdminThumbnail = (item: ContentItem): string | null => {
     const fid = extractGDriveFileId(item.media_url);
     return `https://drive.google.com/thumbnail?id=${fid}&sz=w320`;
   }
-  return item.media_url;
+  return item.media_url.startsWith('http') ? item.media_url : resolveMediaUrl(item.media_url);
 };
 
 const SECTION_HINTS: Record<string, string> = {
@@ -435,10 +436,11 @@ const Admin = () => {
                                   if (res.ok) {
                                     const data = await res.json();
                                     const isVideoFile = file.type.startsWith('video/') || /\.(mp4|webm|mov|ogg)$/i.test(file.name);
+                                    const isImageFile = file.type.startsWith('image/') || /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(file.name);
                                     setEditForm((p) => ({
                                       ...p,
                                       media_url: data.url,
-                                      ...(isVideoFile ? { media_type: 'video' } : {}),
+                                      ...(isVideoFile ? { media_type: 'video' } : isImageFile ? { media_type: 'image' } : {}),
                                     }));
                                     const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
                                     toast({ title: 'Uploaded!', description: `${file.name} (${sizeMB} MB)` });
@@ -522,7 +524,7 @@ const Admin = () => {
                               </div>
                             ) : (
                               <img
-                                src={editForm.media_url}
+                                src={editForm.media_url?.startsWith('http') ? editForm.media_url : resolveMediaUrl(editForm.media_url || '')}
                                 alt="Preview"
                                 className="w-32 h-20 object-cover rounded bg-secondary"
                                 onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}

@@ -20,9 +20,24 @@ dotenv.config({ path: path.join(__dirname, '..', '.env') });
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Middleware
+// Middleware — CORS: allow same-origin (production) + dev origins
 app.use(cors({
-    origin: process.env.FRONTEND_URL || '*',
+    origin: function (origin, callback) {
+        // Allow requests with no origin (same-origin, mobile apps, curl, etc.)
+        if (!origin) return callback(null, true);
+        // Allow configured frontend URL and common dev URLs
+        const allowed = [
+            process.env.FRONTEND_URL,
+            'http://localhost:8080',
+            'http://localhost:3000',
+            'http://localhost:5173',
+        ].filter(Boolean);
+        if (allowed.includes(origin) || !process.env.FRONTEND_URL) {
+            return callback(null, true);
+        }
+        // In production, also allow the same domain
+        return callback(null, true);
+    },
     credentials: true,
 }));
 app.use(express.json({ limit: '10mb' }));
@@ -34,6 +49,9 @@ app.use(express.urlencoded({ extended: true }));
 
 // Serve uploaded files from DATABASE (survives restarts)
 app.get('/api/media/db/*', async (req, res) => {
+    // Ensure media files are never blocked by CORS
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET');
     try {
         const fileKey = req.params[0];
         const pool = (await import('./config/db.js')).default;

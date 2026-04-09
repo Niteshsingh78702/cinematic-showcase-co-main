@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { useContent } from "@/hooks/useContent";
+import { resolveMediaUrl } from "@/lib/resolveMediaUrl";
 import heroBg from "@/assets/hero-bg.jpg";
 
 const HeroSection = () => {
@@ -10,7 +11,7 @@ const HeroSection = () => {
   const heroData = items.length > 0 ? items[0] : null;
   const subtitle = heroData?.title || "Capturing Emotions, Creating Memories";
   const tagline = heroData?.description || "Regional Music, Films & Wedding Moments — Purulia Bangla • Khortha • Santhali";
-  const bgImage = heroData?.media_url || heroBg;
+  const bgImage = heroData?.media_url ? resolveMediaUrl(heroData.media_url) : heroBg;
 
   return (
     <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden">

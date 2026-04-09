@@ -6,6 +6,7 @@ import VideoEmbed from "@/components/VideoEmbed";
 import { isGoogleDriveUrl, extractGDriveFileId, isYouTubeUrl as isYTUrl } from "@/components/VideoEmbed";
 import ImageLightbox from "@/components/ImageLightbox";
 import { useMultiContent, ContentItem } from "@/hooks/useContent";
+import { resolveMediaUrl } from "@/lib/resolveMediaUrl";
 
 /* fallback imports — shown while DB is empty */
 import albumCover from "@/assets/album-cover.jpg";
@@ -76,7 +77,7 @@ const mapAlbums = (items: ContentItem[]) =>
                 ? getYouTubeThumbnail(i.media_url) || albumCover
                 : gdriveDetected && i.media_url
                     ? `https://drive.google.com/thumbnail?id=${extractGDriveFileId(i.media_url)}&sz=w640`
-                    : i.media_url || albumCover,
+                    : i.media_url ? resolveMediaUrl(i.media_url) : albumCover,
             year: i.description || "2024",
             link: i.link_url || (ytDetected && i.media_url
                 ? (i.media_url.includes('youtube.com') || i.media_url.includes('youtu.be')
@@ -96,14 +97,24 @@ const mapFilms = (items: ContentItem[]) =>
         const match = videoId.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|shorts\/))([\w-]{11})/);
         if (match) videoId = match[1];
         const gdriveDetected = i.media_type === 'gdrive' || isGDriveUrl(i.media_url);
+        const ytDetected = i.media_type === 'youtube' || isYouTubeUrl(i.media_url);
+        // For local uploads (non-YouTube, non-GDrive), resolve the URL
+        const resolvedUrl = (ytDetected || gdriveDetected) ? (i.media_url || "dQw4w9WgXcQ") : (i.media_url ? resolveMediaUrl(i.media_url) : "dQw4w9WgXcQ");
+        // Determine media type: local images should be 'image', local videos should be 'video'
+        let detectedMediaType = gdriveDetected ? 'gdrive' : (ytDetected ? 'youtube' : (i.media_type || 'video'));
+        if (!ytDetected && !gdriveDetected && i.media_url) {
+            const isImageExt = /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(i.media_url);
+            if (isImageExt) detectedMediaType = 'image';
+            else if (i.media_type === 'video' || /\.(mp4|webm|mov|ogg)$/i.test(i.media_url)) detectedMediaType = 'video';
+        }
         return {
             title: i.title || "Untitled Film",
             videoId,
             year: i.link_url || "2024",
             genre: i.category || "Drama • Short Film",
             description: i.description || "",
-            fullUrl: i.media_url || "dQw4w9WgXcQ",
-            mediaType: gdriveDetected ? 'gdrive' : (i.media_type || 'youtube'),
+            fullUrl: resolvedUrl,
+            mediaType: detectedMediaType,
         };
     });
 
@@ -112,14 +123,19 @@ const mapWeddings = (items: ContentItem[]) =>
         const ytDetected = i.media_type === 'youtube' || isYouTubeUrl(i.media_url);
         const gdriveDetected = i.media_type === 'gdrive' || isGDriveUrl(i.media_url);
         const videoId = ytDetected && i.media_url ? getVideoId(i.media_url) : null;
+        // Determine media type for local uploads: check if it's a video file
+        let wMediaType: string = gdriveDetected ? 'gdrive' : (ytDetected ? 'youtube' : 'image');
+        if (!ytDetected && !gdriveDetected && i.media_url) {
+            if (i.media_type === 'video' || /\.(mp4|webm|mov|ogg)$/i.test(i.media_url)) wMediaType = 'video';
+        }
         return {
             src: ytDetected && i.media_url
                 ? getYouTubeThumbnail(i.media_url) || weddingCover
                 : gdriveDetected && i.media_url
                     ? `https://drive.google.com/thumbnail?id=${extractGDriveFileId(i.media_url)}&sz=w640`
-                    : i.media_url || weddingCover,
+                    : i.media_url ? resolveMediaUrl(i.media_url) : weddingCover,
             alt: i.title || "Wedding Moment",
-            mediaType: gdriveDetected ? 'gdrive' : (ytDetected ? 'youtube' : 'image'),
+            mediaType: wMediaType,
             videoId,
             fullUrl: i.media_url || "",
             link: i.link_url || (ytDetected && i.media_url
@@ -247,7 +263,6 @@ const Work = () => {
                                         src={album.image}
                                         alt={album.title}
                                         loading="lazy"
-                                        crossOrigin="anonymous"
                                         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                         onError={(e) => {
                                             const el = e.target as HTMLImageElement;
@@ -401,7 +416,6 @@ const Work = () => {
                                         src={photo.src}
                                         alt={photo.alt}
                                         loading="lazy"
-                                        crossOrigin="anonymous"
                                         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                         onError={(e) => {
                                             const el = e.target as HTMLImageElement;
